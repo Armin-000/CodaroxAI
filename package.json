@@ -8,11 +8,14 @@
     "dev:web": "vite",
     "dev:server": "node --env-file=.env --watch server/index.js",
     "build": "vite build",
-    "start": "node --env-file=.env server/index.js"
+    "start": "node --env-file=.env server/index.js",
+    "check:server": "find server -name '*.js' -print0 | xargs -0 -n1 node --check",
+    "check": "npm run check:server && npm run build"
   },
   "dependencies": {
     "express": "^5.1.0",
     "lucide-react": "^0.468.0",
+    "pdfjs-dist": "^4.7.76",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-markdown": "^10.1.0",
