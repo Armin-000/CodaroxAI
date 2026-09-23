@@ -50,6 +50,9 @@ export function sanitizeMessageForStorage(message) {
     ? {
         ...message.generatedImage,
         dataUrl: undefined,
+        storageKey:
+          message.generatedImage.storageKey ||
+          message.id,
       }
     : undefined;
 

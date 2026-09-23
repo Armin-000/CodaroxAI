@@ -13,6 +13,7 @@ import { formatTokens, shortTitle } from "../../../lib/format.js";
 import { createId } from "../../../lib/ids.js";
 import { apiMessages, cleanConversationCopy, mergeDocuments } from "../../../lib/messages.js";
 import { loadRequestUsage, localDayKey, sanitizeMessageForStorage } from "../../../lib/storage.js";
+import { getGeneratedImage, putGeneratedImage } from "../../../lib/imageStore.js";
 
 function generatedImageFileName(prompt = "", mimeType = "image/jpeg") {
   const clean = String(prompt || "")
@@ -55,6 +56,7 @@ export function useChatSession({
   const textareaRef = useRef(null);
   const abortRef = useRef(null);
   const firstResponseTitledRef = useRef(new Set());
+  const historyHydrationRef = useRef(0);
 
   const hasUserMessages = useMemo(
     () => messages.some((message) => message.role === "user"),
@@ -146,6 +148,7 @@ export function useChatSession({
   }
 
   function resetChat() {
+    historyHydrationRef.current += 1;
     abortRef.current?.abort?.();
     window.speechSynthesis?.cancel?.();
     setMessages([INITIAL_MESSAGE]);
@@ -160,20 +163,122 @@ export function useChatSession({
   }
 
   function openHistory(item) {
+    historyHydrationRef.current += 1;
+
+    const hydrationId =
+      historyHydrationRef.current;
+
     abortRef.current?.abort?.();
     window.speechSynthesis?.cancel?.();
-    const restoredMessages = Array.isArray(item.messages) && item.messages.length
-      ? item.messages
-      : [INITIAL_MESSAGE, { id: createId(), role: "user", content: item.preview || item.title }];
+
+    const restoredMessages =
+      Array.isArray(item.messages) &&
+      item.messages.length
+        ? item.messages
+        : [
+            INITIAL_MESSAGE,
+            {
+              id: createId(),
+              role: "user",
+              content:
+                item.preview ||
+                item.title,
+            },
+          ];
+
     setMessages(restoredMessages);
     setInput("");
     setAttachments([]);
     setActiveDocuments([]);
-    setActiveTitle(item.title || "Conversation");
+    setActiveTitle(
+      item.title ||
+      "Conversation"
+    );
     setActiveHistoryId(item.id);
-    setContextUsage(item.contextUsage || emptyContextUsage());
+    setContextUsage(
+      item.contextUsage ||
+      emptyContextUsage()
+    );
     setImageMode(false);
     setStreaming(false);
+
+    const hasStoredImages =
+      restoredMessages.some(
+        (message) =>
+          message?.generatedImage &&
+          !message.generatedImage.dataUrl
+      );
+
+    if (!hasStoredImages) {
+      return;
+    }
+
+    Promise.all(
+      restoredMessages.map(
+        async (message) => {
+          if (
+            !message?.generatedImage ||
+            message.generatedImage.dataUrl
+          ) {
+            return message;
+          }
+
+          const storageKey =
+            message.generatedImage.storageKey ||
+            message.id;
+
+          try {
+            const stored =
+              await getGeneratedImage(
+                storageKey
+              );
+
+            if (!stored?.dataUrl) {
+              return message;
+            }
+
+            return {
+              ...message,
+              generatedImage: {
+                ...message.generatedImage,
+                dataUrl:
+                  stored.dataUrl,
+                mimeType:
+                  stored.mimeType ||
+                  message.generatedImage.mimeType ||
+                  "image/jpeg",
+                prompt:
+                  stored.prompt ||
+                  message.generatedImage.prompt ||
+                  message.imagePrompt ||
+                  "",
+                storageKey,
+              },
+            };
+          } catch (error) {
+            console.warn(
+              "Unable to restore generated image:",
+              error
+            );
+
+            return message;
+          }
+        }
+      )
+    ).then(
+      (hydratedMessages) => {
+        if (
+          historyHydrationRef.current !==
+          hydrationId
+        ) {
+          return;
+        }
+
+        setMessages(
+          hydratedMessages
+        );
+      }
+    );
   }
 
   function apiPayloadMessages(conversation) {
@@ -526,6 +631,28 @@ export function useChatSession({
         );
       }
 
+      const generatedImage = {
+        dataUrl,
+        mimeType:
+          data.mimeType ||
+          "image/jpeg",
+        prompt,
+        storageKey:
+          targetId,
+      };
+
+      try {
+        await putGeneratedImage(
+          targetId,
+          generatedImage
+        );
+      } catch (error) {
+        console.warn(
+          "Unable to persist generated image:",
+          error
+        );
+      }
+
       setMessages((current) =>
         current.map((message) =>
           message.id === targetId
@@ -542,17 +669,11 @@ export function useChatSession({
                   prompt,
                 provider:
                   data.provider ||
-                  "OpenRouter",
+                  "Cloudflare Workers AI",
                 model:
                   data.model ||
                   null,
-                generatedImage: {
-                  dataUrl,
-                  mimeType:
-                    data.mimeType ||
-                    "image/jpeg",
-                  prompt,
-                },
+                generatedImage,
               }
             : message
         )
