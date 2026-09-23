@@ -5,10 +5,10 @@ export const INITIAL_MESSAGE = {
 };
 
 export const STARTERS = [
-  "Explain a complex topic simply",
-  "Help me write production React code",
-  "Brainstorm a new product idea",
-  "Review an architecture decision",
+  "Explain a concept step by step",
+  "Help me debug or write code",
+  "Summarize a document or image",
+  "Draft a professional message",
 ];
 
 export const STORAGE_KEYS = {

@@ -1,17 +1,30 @@
-import { Headphones, Moon, Sun } from "lucide-react";
+import { Menu, Moon, Sun } from "lucide-react";
 import { useApp } from "../../../app/AppContext.jsx";
 
 export function Topbar() {
   const app = useApp();
+
   return (
     <header className="topbar">
-      <div className="topbar-left" />
-      <div className="topbar-actions">
-        <button className="icon-button" onClick={app.toggleTheme}>
-          {app.dark ? <Sun size={18} /> : <Moon size={18} />}
+      <div className="topbar-left">
+        <button
+          className="mobile-nav-button"
+          type="button"
+          aria-label="Open sidebar"
+          onClick={() => app.setSidebarOpen(true)}
+        >
+          <Menu size={19} />
         </button>
-        <button className="voice-top-button" onClick={app.openVoiceMode}>
-          <Headphones size={17} /> Voice
+      </div>
+
+      <div className="topbar-actions">
+        <button
+          className="icon-button"
+          type="button"
+          aria-label="Toggle theme"
+          onClick={app.toggleTheme}
+        >
+          {app.dark ? <Sun size={18} /> : <Moon size={18} />}
         </button>
       </div>
     </header>

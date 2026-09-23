@@ -80,13 +80,6 @@
   top: -1px;
 }
 
-.message-content blockquote {
-  margin: 16px 0;
-  padding: 2px 0 2px 14px;
-  border-left: 2px solid var(--border-strong);
-  color: var(--muted);
-}
-
 .markdown-table-wrap {
   width: 100%;
   margin: 16px 0 20px;
@@ -188,3 +181,175 @@
     font-size: 13px;
   }
 }
+
+/* Canonical markdown flow */
+
+/*
+ * Compact professional Codarox AI rhythm.
+ */
+
+.message-content > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+
+/* Basic block rhythm */
+
+.message-content > * + * {
+  margin-top: 8px;
+}
+
+
+/* Paragraphs */
+
+.message-content p {
+  line-height: 1.52;
+}
+
+
+/* Headings */
+
+.message-content h1,
+.message-content h2,
+.message-content h3,
+.message-content h4,
+.message-content h5,
+.message-content h6 {
+  line-height: 1.25;
+
+  letter-spacing: -0.02em;
+}
+
+.message-content h1 {
+  font-size: 18px;
+  font-weight: 650;
+}
+
+.message-content h2 {
+  font-size: 15.5px;
+  font-weight: 650;
+}
+
+.message-content h3 {
+  font-size: 14.25px;
+  font-weight: 625;
+}
+
+.message-content h4,
+.message-content h5,
+.message-content h6 {
+  font-size: 13.75px;
+  font-weight: 600;
+}
+
+
+/* New sections */
+
+.message-content p + h1,
+.message-content p + h2,
+.message-content p + h3,
+.message-content p + h4,
+.message-content ul + h1,
+.message-content ul + h2,
+.message-content ul + h3,
+.message-content ol + h1,
+.message-content ol + h2,
+.message-content ol + h3 {
+  margin-top: 14px;
+}
+
+
+/* Heading -> body/list */
+
+.message-content h1 + p,
+.message-content h2 + p,
+.message-content h3 + p,
+.message-content h4 + p,
+.message-content h1 + ul,
+.message-content h2 + ul,
+.message-content h3 + ul,
+.message-content h4 + ul,
+.message-content h1 + ol,
+.message-content h2 + ol,
+.message-content h3 + ol,
+.message-content h4 + ol {
+  margin-top: 7px;
+}
+
+
+/* Lists */
+
+.message-content ul,
+.message-content ol {
+  padding-left: 20px;
+}
+
+.message-content li {
+  margin: 0;
+
+  line-height: 1.48;
+}
+
+.message-content li + li {
+  margin-top: 4px;
+}
+
+.message-content li > p {
+  margin: 0;
+}
+
+.message-content li > p + p {
+  margin-top: 4px;
+}
+
+.message-content li > ul,
+.message-content li > ol {
+  margin-top: 4px;
+}
+
+
+/* Blockquotes */
+
+.message-content blockquote {
+  margin: 0;
+
+  padding:
+    1px
+    0
+    1px
+    10px;
+
+  border-left:
+    2px
+    solid
+    var(--border-strong);
+
+  color: var(--muted);
+}
+
+
+/* Code */
+
+.message-content pre {
+  margin: 0;
+}
+
+
+/* Separators */
+
+.message-content hr {
+  height: 0;
+
+  margin:
+    13px
+    0;
+
+  border: 0;
+  border-top:
+    1px
+    solid
+    var(--border);
+}
+
+/* End canonical markdown flow */

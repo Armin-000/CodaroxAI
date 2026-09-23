@@ -10,7 +10,10 @@ export function useAppController() {
   const settingsState = useSettings();
   const attachmentsState = useAttachments();
   const historyState = useHistory();
-  const [sidebarOpen, setSidebarOpen] = useState(() => localStorage.getItem(STORAGE_KEYS.sidebar) !== "false");
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+    if (window.matchMedia?.("(max-width: 700px)").matches) return false;
+    return localStorage.getItem(STORAGE_KEYS.sidebar) !== "false";
+  });
 
   const speakRef = useRef(() => {});
   const voiceStateRef = useRef({ voiceMode: false, voiceEnabled: true });
@@ -62,11 +65,19 @@ export function useAppController() {
   function resetChat() {
     voiceState.recognitionRef.current?.abort?.();
     chatState.resetChat();
+
+    if (window.matchMedia?.("(max-width: 700px)").matches) {
+      setSidebarOpen(false);
+    }
   }
 
   function openHistory(item) {
     voiceState.recognitionRef.current?.abort?.();
     chatState.openHistory(item);
+
+    if (window.matchMedia?.("(max-width: 700px)").matches) {
+      setSidebarOpen(false);
+    }
   }
 
   function deleteHistoryItem(id, event) {

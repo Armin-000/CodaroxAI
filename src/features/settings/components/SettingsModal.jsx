@@ -92,7 +92,7 @@ function GeneralPanel({ app }) {
           <option value="auto">Auto</option><option value="hr">Croatian</option><option value="en">English</option>
         </select>
       </label>
-      <label className="settings-split-row">
+      <label className="settings-split-row settings-toggle-row">
         <span className="settings-row-copy"><strong>Enter to send</strong><small>Otherwise use Cmd/Ctrl + Enter.</small></span>
         <input type="checkbox" checked={app.settings.enterToSend} onChange={(event) => app.updateSetting("enterToSend", event.target.checked)} />
       </label>
@@ -152,7 +152,7 @@ function ModelsPanel({ app }) {
             <tbody>
               {MODEL_OPTIONS.filter((model) => model.value !== "auto").map((model) => (
                 <tr key={model.value} className={app.settings.model === model.value ? "active" : ""}>
-                  <td><strong>{model.shortLabel}</strong></td><td>{model.provider}</td><td>{model.contextLabel}</td><td>{model.inputs}</td><td>{model.bestFor}</td>
+                  <td data-label="Model"><strong>{model.shortLabel}</strong></td><td data-label="Provider">{model.provider}</td><td data-label="Context">{model.contextLabel}</td><td data-label="Inputs">{model.inputs}</td><td data-label="Best for">{model.bestFor}</td>
                 </tr>
               ))}
             </tbody>
@@ -177,7 +177,7 @@ function ResponsesPanel({ app }) {
         <span className="settings-row-copy"><strong>Custom instructions</strong><small>Preferences Codarox should follow in its responses.</small></span>
         <textarea value={app.settings.systemInstructions} maxLength={3000} onChange={(event) => app.updateSetting("systemInstructions", event.target.value)} placeholder="Example: Keep responses concise and use Croatian technical terminology." />
       </label>
-      <label className="settings-split-row">
+      <label className="settings-split-row settings-toggle-row">
         <span className="settings-row-copy"><strong>Generate chat titles</strong><small>Automatically create descriptive titles for new conversations.</small></span>
         <input type="checkbox" checked={app.settings.aiTitles} onChange={(event) => app.updateSetting("aiTitles", event.target.checked)} />
       </label>
@@ -200,7 +200,7 @@ function VoicePanel({ app }) {
           <option value={0.85}>0.85×</option><option value={1}>1.0×</option><option value={1.15}>1.15×</option><option value={1.3}>1.3×</option>
         </select>
       </label>
-      <label className="settings-split-row">
+      <label className="settings-split-row settings-toggle-row">
         <span className="settings-row-copy"><strong>Speak responses automatically</strong><small>Read completed AI responses aloud in Voice Mode.</small></span>
         <input type="checkbox" checked={app.settings.autoSpeak} onChange={(event) => app.updateSetting("autoSpeak", event.target.checked)} />
       </label>

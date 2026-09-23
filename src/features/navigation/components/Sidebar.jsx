@@ -35,20 +35,48 @@ export function Sidebar() {
         <div className="side-section">
           <div className="side-label-row">
             <div className="side-label">Recent</div>
-            {app.history.length > 0 && <button className="clear-history" onClick={app.clearHistory}>Clear</button>}
+            {app.history.length > 0 && <button
+                type="button"
+                className="clear-history"
+                onClick={app.clearHistory}
+                aria-label="Clear conversation history"
+              >
+                Clear
+              </button>}
           </div>
 
           {app.history.length > 0 && (
             <div className="history-search">
               <Search size={14} />
-              <input value={app.historySearch} onChange={(event) => app.setHistorySearch(event.target.value)} placeholder="Search chats" />
+              <input
+                  type="search"
+                  value={app.historySearch}
+                  onChange={(event) => app.setHistorySearch(event.target.value)}
+                  placeholder="Search chats"
+                  aria-label="Search conversations"
+                  autoComplete="off"
+                />
               {app.historySearch && (
-                <button onClick={() => app.setHistorySearch("")} aria-label="Clear search"><X size={13} /></button>
+                <button
+                    type="button"
+                    onClick={() => app.setHistorySearch("")}
+                    aria-label="Clear search"
+                    title="Clear search"
+                  >
+                    <X size={13} />
+                  </button>
               )}
             </div>
           )}
 
-          {app.filteredHistory.map((item) => (
+          {app.historySearch.trim() && app.filteredHistory.length === 0 && (
+                <div className="history-empty" role="status">
+                  <span>No conversations found</span>
+                  <small>Try a different search.</small>
+                </div>
+              )}
+
+              {app.filteredHistory.map((item) => (
             <div key={item.id} className={`history-row ${item.id === app.activeHistoryId ? "active" : ""}`}>
               {app.renamingId === item.id ? (
                 <input
@@ -63,12 +91,34 @@ export function Sidebar() {
                   }}
                 />
               ) : (
-                <button className="history-main" onClick={() => app.openHistory(item)} title={item.preview}>
+                <button
+                      type="button"
+                      className="history-main"
+                      onClick={() => app.openHistory(item)}
+                      title={item.preview}
+                      aria-current={item.id === app.activeHistoryId ? "page" : undefined}
+                    >
                   <span>{item.title}</span>
                 </button>
               )}
-              <button className="history-icon-button" onClick={(event) => app.beginRename(item, event)} title="Rename conversation"><Pencil size={13} /></button>
-              <button className="history-delete" onClick={(event) => app.deleteHistoryItem(item.id, event)} title="Delete conversation"><Trash2 size={14} /></button>
+              <button
+                      type="button"
+                      className="history-icon-button"
+                      onClick={(event) => app.beginRename(item, event)}
+                      aria-label="Rename conversation"
+                      title="Rename conversation"
+                    >
+                      <Pencil size={13} />
+                    </button>
+              <button
+                      type="button"
+                      className="history-delete"
+                      onClick={(event) => app.deleteHistoryItem(item.id, event)}
+                      aria-label="Delete conversation"
+                      title="Delete conversation"
+                    >
+                      <Trash2 size={14} />
+                    </button>
             </div>
           ))}
         </div>
@@ -114,13 +164,48 @@ export function Sidebar() {
         <aside className="sidebar-dock" aria-label="Collapsed sidebar">
           <div className="dock-top">
             <div className="dock-logo" data-tooltip="Codarox AI"><Logo size={30} /></div>
-            <button className="dock-button" onClick={() => app.setSidebarOpen(true)} data-tooltip="Open sidebar"><PanelLeftOpen size={20} /></button>
+            <button
+              type="button"
+              className="dock-button"
+              onClick={() => app.setSidebarOpen(true)}
+              data-tooltip="Open sidebar"
+              aria-label="Open sidebar"
+            >
+              <PanelLeftOpen size={20} />
+            </button>
             <div className="dock-separator" />
-            <button className="dock-button" onClick={app.resetChat} data-tooltip="New chat"><MessageSquarePlus size={20} /></button>
-            <button className="dock-button" onClick={() => app.setSidebarOpen(true)} data-tooltip="Conversations"><History size={20} /></button>
+            <button
+              type="button"
+              className={`dock-button ${!app.activeHistoryId && !app.settingsOpen ? "active" : ""}`}
+              onClick={app.resetChat}
+              data-tooltip="New chat"
+              aria-label="New chat"
+              aria-current={!app.activeHistoryId && !app.settingsOpen ? "page" : undefined}
+            >
+              <MessageSquarePlus size={20} />
+            </button>
+            <button
+              type="button"
+              className={`dock-button ${app.activeHistoryId && !app.settingsOpen ? "active" : ""}`}
+              onClick={() => app.setSidebarOpen(true)}
+              data-tooltip="Conversations"
+              aria-label="Conversations"
+              aria-current={app.activeHistoryId && !app.settingsOpen ? "page" : undefined}
+            >
+              <History size={20} />
+            </button>
           </div>
           <div className="dock-bottom">
-            <button className="dock-button" onClick={() => app.setSettingsOpen(true)} data-tooltip="Settings"><Settings2 size={20} /></button>
+            <button
+              type="button"
+              className={`dock-button ${app.settingsOpen ? "active" : ""}`}
+              onClick={() => app.setSettingsOpen(true)}
+              data-tooltip="Settings"
+              aria-label="Settings"
+              aria-current={app.settingsOpen ? "page" : undefined}
+            >
+              <Settings2 size={20} />
+            </button>
             <div className="dock-quota" data-tooltip={`Local requests today: ${app.requestUsage.count}`}>{app.requestUsage.count}</div>
             <div className={`dock-context ${app.contextState}`} data-tooltip={`Active context ${Math.round(app.contextPercent)}%`}><span>{Math.round(app.contextPercent)}%</span></div>
           </div>

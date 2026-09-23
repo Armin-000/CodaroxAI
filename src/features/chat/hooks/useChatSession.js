@@ -161,7 +161,14 @@ export function useChatSession({
     return apiMessages(conversation);
   }
 
-  async function runStream({ conversation, targetId, documents, append = false, hiddenInstruction = "" }) {
+  async function runStream({
+    conversation,
+    targetId,
+    documents,
+    append = false,
+    hiddenInstruction = "",
+    silentRetry = 0,
+  }) {
     const target = conversation.find((message) => message.id === targetId) || messages.find((message) => message.id === targetId);
     const initialText = append && target?.content
       ? `${target.content}${target.content.endsWith("\n") ? "" : "\n\n"}`
@@ -173,7 +180,7 @@ export function useChatSession({
     setStreaming(true);
     const controller = new AbortController();
     abortRef.current = controller;
-    incrementRequestCount();
+    if (silentRetry === 0) incrementRequestCount();
 
     try {
       const payloadMessages = apiPayloadMessages(conversation);
@@ -198,10 +205,56 @@ export function useChatSession({
 
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
-        const info = friendlyError(response.status, data.error || data.message || "");
-        setMessages((current) => current.map((message) =>
-          message.id === targetId ? { ...message, content: "", error: info, finishReason: null } : message
-        ));
+
+        const transientStatus = [
+          408,
+          500,
+          502,
+          503,
+          504,
+        ].includes(response.status);
+
+        if (
+          transientStatus &&
+          silentRetry < 1 &&
+          !controller.signal.aborted
+        ) {
+          console.warn(
+            `Transient AI HTTP ${response.status}; retrying once automatically.`
+          );
+
+          await new Promise((resolve) =>
+            window.setTimeout(resolve, 700)
+          );
+
+          return runStream({
+            conversation,
+            targetId,
+            documents,
+            append,
+            hiddenInstruction,
+            silentRetry: silentRetry + 1,
+          });
+        }
+
+        const info = friendlyError(
+          response.status,
+          data.error || data.message || ""
+        );
+
+        setMessages((current) =>
+          current.map((message) =>
+            message.id === targetId
+              ? {
+                  ...message,
+                  content: "",
+                  error: info,
+                  finishReason: null,
+                }
+              : message
+          )
+        );
+
         return { ok: false, error: info };
       }
 
@@ -241,8 +294,17 @@ export function useChatSession({
 
         if (event.type === "done") {
           finishReason = event.finishReason || null;
+
           setMessages((current) => current.map((message) =>
-            message.id === targetId ? { ...message, finishReason, error: null } : message
+            message.id === targetId
+              ? {
+                  ...message,
+                  finishReason,
+                  error: null,
+                  provider: event.provider || null,
+                  model: event.model || null,
+                }
+              : message
           ));
         }
 
@@ -263,10 +325,43 @@ export function useChatSession({
       if (buffer.trim()) consumeLine(buffer);
 
       if (streamError && !fullText.trim()) {
+
+        if (
+          silentRetry < 1 &&
+          !controller.signal.aborted
+        ) {
+          console.warn(
+            "AI stream failed before first token; retrying once automatically."
+          );
+
+          await new Promise((resolve) =>
+            window.setTimeout(resolve, 700)
+          );
+
+          return runStream({
+            conversation,
+            targetId,
+            documents,
+            append,
+            hiddenInstruction,
+            silentRetry: silentRetry + 1,
+          });
+        }
+
         const info = friendlyError(502, streamError);
-        setMessages((current) => current.map((message) =>
-          message.id === targetId ? { ...message, content: "", error: info } : message
-        ));
+
+        setMessages((current) =>
+          current.map((message) =>
+            message.id === targetId
+              ? {
+                  ...message,
+                  content: "",
+                  error: info,
+                }
+              : message
+          )
+        );
+
         return { ok: false, error: info };
       }
 
@@ -289,10 +384,40 @@ export function useChatSession({
         ));
         return { ok: false, aborted: true };
       }
+      if (silentRetry < 1) {
+        console.warn(
+          "AI network request failed; retrying once automatically.",
+          error
+        );
+
+        await new Promise((resolve) =>
+          window.setTimeout(resolve, 700)
+        );
+
+        return runStream({
+          conversation,
+          targetId,
+          documents,
+          append,
+          hiddenInstruction,
+          silentRetry: silentRetry + 1,
+        });
+      }
+
       const info = friendlyError(502, error.message);
-      setMessages((current) => current.map((message) =>
-        message.id === targetId ? { ...message, content: "", error: info } : message
-      ));
+
+      setMessages((current) =>
+        current.map((message) =>
+          message.id === targetId
+            ? {
+                ...message,
+                content: "",
+                error: info,
+              }
+            : message
+        )
+      );
+
       return { ok: false, error: info };
     } finally {
       setStreaming(false);
@@ -356,7 +481,15 @@ export function useChatSession({
     const index = messages.findIndex((message) => message.id === messageId);
     if (index < 0) return;
     const conversation = messages.slice(0, index + 1).map((message) =>
-      message.id === messageId ? { ...message, finishReason: null, error: null } : message
+      message.id === messageId
+        ? {
+            ...message,
+            finishReason: null,
+            error: null,
+            provider: null,
+            model: null,
+          }
+        : message
     );
     setMessages(conversation);
     await runStream({
@@ -373,7 +506,15 @@ export function useChatSession({
     const index = messages.findIndex((message) => message.id === messageId);
     if (index <= 0) return;
     const conversation = messages.slice(0, index);
-    const replacement = { id: messageId, role: "assistant", content: "", finishReason: null, error: null };
+    const replacement = {
+      id: messageId,
+      role: "assistant",
+      content: "",
+      finishReason: null,
+      error: null,
+      provider: null,
+      model: null,
+    };
     setMessages([...conversation, replacement]);
     await runStream({ conversation, targetId: messageId, documents: activeDocuments });
   }

@@ -1,6 +1,56 @@
 import { env } from "../../../config/env.js";
 import { buildOpenRouterPayload } from "../messageAdapter.js";
-import { readProviderError } from "../../../utils/http.js";
+import { readProviderError, sleep } from "../../../utils/http.js";
+
+/* CODAROX_PROVIDER_RETRY_V1 */
+
+const TRANSIENT_STATUSES = new Set([
+  408,
+  500,
+  502,
+  503,
+  504,
+]);
+
+async function fetchWithRetry(url, options, attempts = 2) {
+  let lastError = null;
+
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    try {
+      const response = await fetch(url, options);
+
+      if (
+        response.ok ||
+        !TRANSIENT_STATUSES.has(response.status) ||
+        attempt === attempts - 1
+      ) {
+        return response;
+      }
+
+      /*
+       * Consume failed body before retrying.
+       */
+      await response.arrayBuffer().catch(() => {});
+    } catch (error) {
+      lastError = error;
+
+      if (
+        error?.name === "AbortError" ||
+        attempt === attempts - 1
+      ) {
+        throw error;
+      }
+    }
+
+    /*
+     * Short exponential delay:
+     * first retry after ~650 ms.
+     */
+    await sleep(650 * (2 ** attempt));
+  }
+
+  throw lastError || new Error("OpenRouter request failed.");
+}
 
 function extractDeltaContent(parsed) {
   const value = parsed?.choices?.[0]?.delta?.content;
@@ -71,7 +121,7 @@ export async function streamOpenRouter({ body, modelConfig, signal, origin, hand
 
   let upstream;
   try {
-    upstream = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    upstream = await fetchWithRetry("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       signal,
       headers: {
@@ -92,7 +142,7 @@ export async function streamOpenRouter({ body, modelConfig, signal, origin, hand
       ok: false,
       status: upstream.status || 502,
       error: await readProviderError(upstream),
-      unavailable: [429, 500, 502, 503, 504].includes(upstream.status),
+      unavailable: TRANSIENT_STATUSES.has(upstream.status) || upstream.status === 429,
     };
   }
 
