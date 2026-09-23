@@ -5,6 +5,7 @@ import { env } from "./config/env.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { chatRouter } from "./routes/chat.routes.js";
 import { healthRouter } from "./routes/health.routes.js";
+import { imageRouter } from "./routes/image.routes.js";
 import { providerRouter } from "./routes/provider.routes.js";
 import { titleRouter } from "./routes/title.routes.js";
 
@@ -15,6 +16,7 @@ export function createApp() {
 
   app.use("/api/health", healthRouter);
   app.use("/api/chat", chatRouter);
+  app.use("/api/images", imageRouter);
   app.use("/api/title", titleRouter);
   app.use("/api", providerRouter);
 

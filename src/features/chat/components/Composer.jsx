@@ -22,7 +22,7 @@ export function Composer() {
       )}
 
       <div
-        className={`composer ${app.listening ? "listening" : ""} ${app.dragActive ? "drag-active" : ""}`}
+        className={`composer ${app.listening ? "listening" : ""} ${app.dragActive ? "drag-active" : ""} ${app.imageMode ? "image-mode" : ""}`}
         onDragEnter={(event) => { event.preventDefault(); app.setDragActive(true); }}
         onDragOver={(event) => { event.preventDefault(); app.setDragActive(true); }}
         onDragLeave={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) app.setDragActive(false); }}
@@ -56,31 +56,92 @@ export function Composer() {
           </div>
         )}
 
+        {app.imageMode && (
+          <div
+            className="image-mode-bar"
+            role="status"
+          >
+            <span className="image-mode-copy">
+              <ImageIcon size={14} />
+              <span>Create image</span>
+            </span>
+
+            <button
+              type="button"
+              onClick={app.toggleImageMode}
+              aria-label="Exit Create image mode"
+              title="Exit Create image mode"
+            >
+              <X size={13} />
+            </button>
+          </div>
+        )}
+
         <textarea
           ref={app.textareaRef}
           value={app.input}
           onChange={(event) => app.setInput(event.target.value)}
           onKeyDown={app.handleKeyDown}
           onPaste={app.handleComposerPaste}
-          placeholder={app.listening ? "Listening…" : "Message Codarox AI"}
+          placeholder={
+            app.imageMode
+              ? "Describe the image you want to create…"
+              : app.listening
+                ? "Listening…"
+                : "Message Codarox AI"
+          }
           rows={1}
           aria-label="Message Codarox AI"
         />
 
         <div className="composer-bottom">
           <div className="composer-tools">
-            <button className="tool-button" type="button" onClick={() => app.fileInputRef.current?.click()} disabled={app.streaming} title="Attach images or documents"><Plus size={18} /></button>
+            <button
+              className="tool-button"
+              type="button"
+              onClick={() =>
+                app.fileInputRef.current?.click()
+              }
+              disabled={
+                app.streaming ||
+                app.imageMode
+              }
+              title="Attach images or documents"
+            >
+              <Plus size={18} />
+            </button>
+
+            <button
+              className={`tool-button image-generation-button ${app.imageMode ? "active" : ""}`}
+              type="button"
+              onClick={app.toggleImageMode}
+              disabled={app.streaming}
+              aria-pressed={app.imageMode}
+              title={
+                app.imageMode
+                  ? "Exit Create image mode"
+                  : "Create image"
+              }
+            >
+              <ImageIcon size={18} />
+            </button>
             <button className={`tool-button ${app.listening ? "active" : ""}`} onClick={app.toggleVoiceListening} disabled={!app.speechSupported || app.streaming} title="Voice input">
               {app.listening ? <AudioLines size={18} /> : <Mic size={18} />}
             </button>
           </div>
 
           <div className="composer-actions-right">
-            <ModelPicker
-              value={app.settings.model || "auto"}
-              disabled={app.streaming}
-              onChange={(value) => app.updateSetting("model", value)}
-            />
+            {app.imageMode ? (
+              <span className="composer-image-model">
+                FLUX.1 Schnell
+              </span>
+            ) : (
+              <ModelPicker
+                value={app.settings.model || "auto"}
+                disabled={app.streaming}
+                onChange={(value) => app.updateSetting("model", value)}
+              />
+            )}
             {app.streaming ? (
               <button className="send-button stop-button" onClick={app.stopGeneration} aria-label="Stop"><Square size={14} fill="currentColor" /></button>
             ) : (

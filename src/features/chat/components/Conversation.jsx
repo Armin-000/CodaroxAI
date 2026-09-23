@@ -1,4 +1,4 @@
-import { AlertCircle, Check, Copy, FileText, Plus, RefreshCw, Sparkles, Volume2 } from "lucide-react";
+import { AlertCircle, Check, Copy, Download, FileText, Plus, RefreshCw, Sparkles, Volume2 } from "lucide-react";
 import { useApp } from "../../../app/AppContext.jsx";
 import { Logo } from "../../../components/ui/Logo.jsx";
 import { MarkdownMessage } from "./MarkdownMessage.jsx";
@@ -147,7 +147,13 @@ export function Conversation() {
                                 <span className="stream-status-indicator" aria-hidden="true" />
 
                                 <span className="stream-status-label">
-                                  {message.content ? "Generating" : "Thinking"}
+                                  {
+                                    message.generationMode === "image"
+                                      ? "Generating image"
+                                      : message.content
+                                        ? "Generating"
+                                        : "Thinking"
+                                  }
                                 </span>
 
                                 {!message.content && (
@@ -160,9 +166,29 @@ export function Conversation() {
                               </div>
                             )}
 
-                            {message.content
-                              ? <MarkdownMessage>{message.content}</MarkdownMessage>
-                              : null}
+                            {message.generatedImage?.dataUrl ? (
+                              <figure className="generated-image-card">
+                                <img
+                                  src={message.generatedImage.dataUrl}
+                                  alt={
+                                    message.imagePrompt ||
+                                    message.generatedImage.prompt ||
+                                    "Generated image"
+                                  }
+                                />
+
+                                <figcaption>
+                                  {
+                                    message.imagePrompt ||
+                                    message.generatedImage.prompt
+                                  }
+                                </figcaption>
+                              </figure>
+                            ) : message.content ? (
+                              <MarkdownMessage>
+                                {message.content}
+                              </MarkdownMessage>
+                            ) : null}
                           </>
                         ) : (
                           message.content
@@ -177,6 +203,18 @@ export function Conversation() {
                           role="group"
                           aria-label="Message actions"
                         >
+                          {message.generationMode === "image" && message.generatedImage?.dataUrl && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                app.downloadGeneratedImage(message)
+                              }
+                              aria-label="Download generated image"
+                              data-tooltip="Download"
+                            >
+                              <Download size={15} />
+                            </button>
+                          )}
                           <button
                             type="button"
                             onClick={() => app.copyMessage(message.id, message.content)}
@@ -202,8 +240,16 @@ export function Conversation() {
                             <button
                               type="button"
                               onClick={() => app.retryMessage(message.id)}
-                              aria-label="Retry response"
-                              data-tooltip="Retry"
+                              aria-label={
+                                message.generationMode === "image"
+                                  ? "Regenerate image"
+                                  : "Retry response"
+                              }
+                              data-tooltip={
+                                message.generationMode === "image"
+                                  ? "Regenerate"
+                                  : "Retry"
+                              }
                             >
                               <RefreshCw size={15} />
                             </button>

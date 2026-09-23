@@ -14,6 +14,22 @@ import { createId } from "../../../lib/ids.js";
 import { apiMessages, cleanConversationCopy, mergeDocuments } from "../../../lib/messages.js";
 import { loadRequestUsage, localDayKey, sanitizeMessageForStorage } from "../../../lib/storage.js";
 
+function generatedImageFileName(prompt = "", mimeType = "image/jpeg") {
+  const clean = String(prompt || "")
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 48);
+
+  const extension =
+    mimeType === "image/png"
+      ? "png"
+      : "jpg";
+
+  return "codarox-" + (clean || "generated-image") + "." + extension;
+}
+
 export function useChatSession({
   settings,
   attachments,
@@ -28,6 +44,7 @@ export function useChatSession({
   const [messages, setMessages] = useState([INITIAL_MESSAGE]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
+  const [imageMode, setImageMode] = useState(false);
   const [copied, setCopied] = useState(null);
   const [activeTitle, setActiveTitle] = useState("New conversation");
   const [activeHistoryId, setActiveHistoryId] = useState(null);
@@ -138,6 +155,7 @@ export function useChatSession({
     setActiveTitle("New conversation");
     setActiveHistoryId(null);
     setContextUsage(emptyContextUsage());
+    setImageMode(false);
     setStreaming(false);
   }
 
@@ -154,6 +172,7 @@ export function useChatSession({
     setActiveTitle(item.title || "Conversation");
     setActiveHistoryId(item.id);
     setContextUsage(item.contextUsage || emptyContextUsage());
+    setImageMode(false);
     setStreaming(false);
   }
 
@@ -425,6 +444,183 @@ export function useChatSession({
     }
   }
 
+  async function runImageGeneration({
+    prompt,
+    targetId,
+  }) {
+    setStreaming(true);
+
+    const controller =
+      new AbortController();
+
+    abortRef.current = controller;
+
+    incrementRequestCount();
+
+    try {
+      const response =
+        await fetch(
+          "/api/images/generate",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+            signal:
+              controller.signal,
+            body: JSON.stringify({
+              prompt,
+              aspectRatio: "1:1",
+              outputFormat: "jpeg",
+            }),
+          }
+        );
+
+      const data =
+        await response
+          .json()
+          .catch(() => ({}));
+
+      if (!response.ok) {
+        const info =
+          friendlyError(
+            response.status,
+            data.error ||
+            data.message ||
+            ""
+          );
+
+        setMessages((current) =>
+          current.map((message) =>
+            message.id === targetId
+              ? {
+                  ...message,
+                  content: "",
+                  error: info,
+                  finishReason: null,
+                  generationMode: "image",
+                }
+              : message
+          )
+        );
+
+        return {
+          ok: false,
+          error: info,
+        };
+      }
+
+      const dataUrl =
+        String(
+          data.dataUrl || ""
+        ).trim();
+
+      if (
+        !dataUrl.startsWith(
+          "data:image/"
+        )
+      ) {
+        throw new Error(
+          "Image provider returned invalid image data."
+        );
+      }
+
+      setMessages((current) =>
+        current.map((message) =>
+          message.id === targetId
+            ? {
+                ...message,
+                content:
+                  "Generated image",
+                error: null,
+                finishReason:
+                  "image",
+                generationMode:
+                  "image",
+                imagePrompt:
+                  prompt,
+                provider:
+                  data.provider ||
+                  "OpenRouter",
+                model:
+                  data.model ||
+                  null,
+                generatedImage: {
+                  dataUrl,
+                  mimeType:
+                    data.mimeType ||
+                    "image/jpeg",
+                  prompt,
+                },
+              }
+            : message
+        )
+      );
+
+      return {
+        ok: true,
+        dataUrl,
+      };
+    } catch (error) {
+      if (
+        error?.name ===
+        "AbortError"
+      ) {
+        setMessages((current) =>
+          current.map((message) =>
+            message.id === targetId
+              ? {
+                  ...message,
+                  content:
+                    "_Image generation stopped._",
+                  interrupted: true,
+                  finishReason:
+                    "cancelled",
+                  generationMode:
+                    "image",
+                }
+              : message
+          )
+        );
+
+        return {
+          ok: false,
+          aborted: true,
+        };
+      }
+
+      const info =
+        friendlyError(
+          502,
+          error?.message ||
+          "Unable to generate image."
+        );
+
+      setMessages((current) =>
+        current.map((message) =>
+          message.id === targetId
+            ? {
+                ...message,
+                content: "",
+                error: info,
+                generationMode:
+                  "image",
+              }
+            : message
+        )
+      );
+
+      return {
+        ok: false,
+        error: info,
+      };
+    } finally {
+      setStreaming(false);
+      abortRef.current = null;
+    }
+  }
+
   async function maybeGenerateAITitle(firstUserText, conversationId) {
     if (!settings.aiTitles || !firstUserText || firstResponseTitledRef.current.has(conversationId)) return;
     firstResponseTitledRef.current.add(conversationId);
@@ -457,6 +653,88 @@ export function useChatSession({
 
     const effectiveText = text || "Please analyze the attached file or files.";
     const isFirstTurn = !hasUserMessages;
+
+    if (imageMode) {
+      if (!text) return;
+
+      if (
+        selectedAttachments.length > 0
+      ) {
+        window.alert(
+          "Create image V1 currently uses text prompts only. Remove attachments first."
+        );
+        return;
+      }
+
+      const userMessage = {
+        id: createId(),
+        role: "user",
+        content: text,
+        attachments: [],
+      };
+
+      const assistantMessage = {
+        id: createId(),
+        role: "assistant",
+        content: "",
+        finishReason: null,
+        error: null,
+        provider: null,
+        model: null,
+        generationMode: "image",
+        imagePrompt: text,
+      };
+
+      const outgoing = [
+        ...messages,
+        userMessage,
+      ];
+
+      const nextConversationId =
+        activeHistoryId ||
+        createId();
+
+      if (!activeHistoryId) {
+        setActiveHistoryId(
+          nextConversationId
+        );
+      }
+
+      if (isFirstTurn) {
+        setActiveTitle(
+          shortTitle(text)
+        );
+      }
+
+      setInput("");
+      setAttachments([]);
+      setImageMode(false);
+
+      setMessages([
+        ...outgoing,
+        assistantMessage,
+      ]);
+
+      const result =
+        await runImageGeneration({
+          prompt: text,
+          targetId:
+            assistantMessage.id,
+        });
+
+      if (
+        isFirstTurn &&
+        result?.ok
+      ) {
+        await maybeGenerateAITitle(
+          text,
+          nextConversationId
+        );
+      }
+
+      return;
+    }
+
     const docsFromAttachments = selectedAttachments.filter((item) => item.kind === "pdf" || item.kind === "text");
     const documentsForRequest = mergeDocuments(activeDocuments, docsFromAttachments);
     const userMessage = { id: createId(), role: "user", content: effectiveText, attachments: selectedAttachments };
@@ -503,9 +781,67 @@ export function useChatSession({
 
   async function retryMessage(messageId) {
     if (streaming) return;
-    const index = messages.findIndex((message) => message.id === messageId);
+
+    const index =
+      messages.findIndex(
+        (message) =>
+          message.id === messageId
+      );
+
     if (index <= 0) return;
-    const conversation = messages.slice(0, index);
+
+    const target =
+      messages[index];
+
+    const conversation =
+      messages.slice(0, index);
+
+    if (
+      target?.generationMode ===
+      "image"
+    ) {
+      const previousUser =
+        [...conversation]
+          .reverse()
+          .find(
+            (message) =>
+              message.role === "user"
+          );
+
+      const prompt =
+        String(
+          target.imagePrompt ||
+          previousUser?.content ||
+          ""
+        ).trim();
+
+      if (!prompt) return;
+
+      const replacement = {
+        id: messageId,
+        role: "assistant",
+        content: "",
+        finishReason: null,
+        error: null,
+        provider: null,
+        model: null,
+        generationMode: "image",
+        imagePrompt: prompt,
+      };
+
+      setMessages([
+        ...conversation,
+        replacement,
+      ]);
+
+      await runImageGeneration({
+        prompt,
+        targetId: messageId,
+      });
+
+      return;
+    }
+
     const replacement = {
       id: messageId,
       role: "assistant",
@@ -515,8 +851,17 @@ export function useChatSession({
       provider: null,
       model: null,
     };
-    setMessages([...conversation, replacement]);
-    await runStream({ conversation, targetId: messageId, documents: activeDocuments });
+
+    setMessages([
+      ...conversation,
+      replacement,
+    ]);
+
+    await runStream({
+      conversation,
+      targetId: messageId,
+      documents: activeDocuments,
+    });
   }
 
   function stopGeneration() {
@@ -528,6 +873,57 @@ export function useChatSession({
     navigator.clipboard.writeText(content);
     setCopied(id);
     window.setTimeout(() => setCopied(null), 1200);
+  }
+
+  function toggleImageMode() {
+    if (streaming) return;
+
+    if (
+      !imageMode &&
+      attachments.length > 0
+    ) {
+      window.alert(
+        "Remove attachments before entering Create image mode."
+      );
+      return;
+    }
+
+    setImageMode(
+      (current) => !current
+    );
+
+    window.requestAnimationFrame(
+      () =>
+        textareaRef.current?.focus?.()
+    );
+  }
+
+  function downloadGeneratedImage(message) {
+    const dataUrl =
+      message?.generatedImage?.dataUrl;
+
+    if (
+      typeof dataUrl !== "string" ||
+      !dataUrl.startsWith("data:image/")
+    ) {
+      return;
+    }
+
+    const link =
+      document.createElement("a");
+
+    link.href = dataUrl;
+
+    link.download =
+      generatedImageFileName(
+        message.imagePrompt ||
+        message.generatedImage?.prompt,
+        message.generatedImage?.mimeType
+      );
+
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
   }
 
   function handleKeyDown(event) {
@@ -552,6 +948,7 @@ export function useChatSession({
     input,
     setInput,
     streaming,
+    imageMode,
     copied,
     activeTitle,
     setActiveTitle,
@@ -573,6 +970,8 @@ export function useChatSession({
     retryMessage,
     stopGeneration,
     copyMessage,
+    toggleImageMode,
+    downloadGeneratedImage,
     handleKeyDown,
     handleConversationCopy,
   };

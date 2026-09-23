@@ -10,6 +10,9 @@ export const env = Object.freeze({
   openRouterApiKey: process.env.OPENROUTER_API_KEY || "",
   openRouterModel: (process.env.OPENROUTER_MODEL || "inclusionai/ling-3.0-flash-vl:free").trim(),
   geminiApiKey: process.env.GEMINI_API_KEY || "",
+  cloudflareAccountId: (process.env.CLOUDFLARE_ACCOUNT_ID || "").trim(),
+  cloudflareApiToken: (process.env.CLOUDFLARE_API_TOKEN || "").trim(),
+  cloudflareImageModel: (process.env.CLOUDFLARE_IMAGE_MODEL || "@cf/black-forest-labs/flux-1-schnell").trim(),
   defaultContextLimit: Number(process.env.CONTEXT_LIMIT || 262144),
   projectRoot: path.resolve(__dirname, "../.."),
 });

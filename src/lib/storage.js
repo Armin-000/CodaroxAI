@@ -45,5 +45,17 @@ export function sanitizeMessageForStorage(message) {
   const attachments = Array.isArray(message.attachments)
     ? message.attachments.map(({ data, text, ...attachment }) => attachment)
     : undefined;
-  return attachments ? { ...message, attachments } : { ...message };
+
+  const generatedImage = message?.generatedImage
+    ? {
+        ...message.generatedImage,
+        dataUrl: undefined,
+      }
+    : undefined;
+
+  return {
+    ...message,
+    ...(attachments ? { attachments } : {}),
+    ...(generatedImage ? { generatedImage } : {}),
+  };
 }
