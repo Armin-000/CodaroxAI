@@ -15,6 +15,16 @@ export function Topbar() {
         >
           <Menu size={19} />
         </button>
+
+        <a
+          className="codarox-product-link"
+          href="https://codarox.com/"
+          target="_blank"
+          rel="noreferrer"
+          aria-label="Visit Codarox"
+        >
+          A Codarox product
+        </a>
       </div>
 
       <div className="topbar-actions">

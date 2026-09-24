@@ -1,7 +1,7 @@
 {
   "name": "Codarox AI",
   "short_name": "Codarox AI",
-  "description": "Codarox AI assistant",
+  "description": "Multimodal AI assistant by Codarox for conversations, coding, document and image analysis, and AI image generation.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
