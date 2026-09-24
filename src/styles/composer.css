@@ -754,11 +754,27 @@
 .image-mode-copy {
   display: inline-flex;
 
+  min-width: 0;
+
   align-items: center;
 
-  gap: 6px;
+  gap: 7px;
 
   font-weight: 600;
+}
+
+.image-mode-reference {
+  display: block;
+
+  width: 24px;
+  height: 24px;
+
+  flex: 0 0 24px;
+
+  border: 1px solid var(--border);
+  border-radius: 7px;
+
+  object-fit: cover;
 }
 
 .image-mode-bar button {

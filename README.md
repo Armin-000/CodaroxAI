@@ -13,15 +13,15 @@ A polished, Vercel-inspired AI chat interface built with **React + Vite**.
 - Full-screen Voice Mode
 - Conversation sidebar
 - Safe backend API proxy: the AI key never ships to the browser
-- Hosted model access through OpenRouter
-- Default model route: `openrouter/free`
+- Hosted model access through Google Gemini and OpenRouter
+- Resilient Auto routing with provider/model failover and short circuit breaking
 - No local LLM required
 
 ## Requirements
 
 - Node.js 20+ recommended
 - Chrome or Edge recommended for browser speech recognition
-- A free OpenRouter API key
+- At least one AI provider key: Google Gemini and/or OpenRouter
 
 ## Setup
 
@@ -30,11 +30,12 @@ npm install
 cp .env.example .env
 ```
 
-Open `.env` and add your OpenRouter key:
+Open `.env` and add at least one provider key. For the full Auto route, configure both:
 
 ```env
+GEMINI_API_KEY=...
 OPENROUTER_API_KEY=sk-or-v1-...
-OPENROUTER_MODEL=qwen/qwen3-next-80b-a3b-instruct:free
+OPENROUTER_MODEL=inclusionai/ling-3.0-flash-vl:free
 ```
 
 Start development:
@@ -78,17 +79,18 @@ This works best in Chromium browsers such as Chrome and Edge.
 
 Assistant speech uses the browser's built-in `speechSynthesis` API, so it does not require a paid TTS API.
 
-## Switch AI model
+## AI routing
 
-Change:
+The model picker controls manual model selection. In **Auto** mode, chat requests are routed in this order when the corresponding provider key is configured:
 
-```env
-OPENROUTER_MODEL=qwen/qwen3-next-80b-a3b-instruct:free
-```
+1. `gemini-3.8-flash`
+2. `gemini-3.5-flash-lite`
+3. `inclusionai/ling-3.0-flash-vl:free`
+4. `openrouter/free`
 
-to any OpenRouter model you have access to.
+Transient `5xx` failures receive at most one short backend retry. `429` rate limits immediately move to the next Auto candidate instead of repeatedly hitting the same route. Repeated provider failures temporarily open an in-memory circuit breaker so subsequent requests can reach a healthy route faster. Frontend-level duplicate retries are intentionally disabled.
 
-The backend uses Qwen3 Next 80B A3B Instruct (free) first and automatically falls back to NVIDIA Nemotron 3 Ultra (free) if the primary provider is temporarily unavailable.
+`OPENROUTER_MODEL` is still used by auxiliary OpenRouter features such as title generation; chat model selection comes from the model picker / Auto router.
 
 
 ## Conversation context meter

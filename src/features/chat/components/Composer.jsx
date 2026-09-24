@@ -62,15 +62,27 @@ export function Composer() {
             role="status"
           >
             <span className="image-mode-copy">
-              <ImageIcon size={14} />
-              <span>Create image</span>
+              {app.imageEditSource?.generatedImage?.dataUrl ? (
+                <img
+                  className="image-mode-reference"
+                  src={app.imageEditSource.generatedImage.dataUrl}
+                  alt="Image selected for editing"
+                />
+              ) : (
+                <ImageIcon size={14} />
+              )}
+              <span>
+                {app.imageEditSource
+                  ? "Edit image"
+                  : "Create image"}
+              </span>
             </span>
 
             <button
               type="button"
               onClick={app.toggleImageMode}
-              aria-label="Exit Create image mode"
-              title="Exit Create image mode"
+              aria-label={app.imageEditSource ? "Exit Edit image mode" : "Exit Create image mode"}
+              title={app.imageEditSource ? "Exit Edit image mode" : "Exit Create image mode"}
             >
               <X size={13} />
             </button>
@@ -85,7 +97,9 @@ export function Composer() {
           onPaste={app.handleComposerPaste}
           placeholder={
             app.imageMode
-              ? "Describe the image you want to create…"
+              ? app.imageEditSource
+                ? "Describe what you want to change…"
+                : "Describe the image you want to create…"
               : app.listening
                 ? "Listening…"
                 : "Message Codarox AI"
@@ -133,7 +147,9 @@ export function Composer() {
           <div className="composer-actions-right">
             {app.imageMode ? (
               <span className="composer-image-model">
-                FLUX.1 Schnell
+                {app.imageEditSource
+                  ? "FLUX.2 Klein 4B"
+                  : "FLUX.1 Schnell"}
               </span>
             ) : (
               <ModelPicker

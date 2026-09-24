@@ -14,6 +14,7 @@ import { createId } from "../../../lib/ids.js";
 import { apiMessages, cleanConversationCopy, mergeDocuments } from "../../../lib/messages.js";
 import { loadRequestUsage, localDayKey, sanitizeMessageForStorage } from "../../../lib/storage.js";
 import { getGeneratedImage, putGeneratedImage } from "../../../lib/imageStore.js";
+import { prepareImageReference } from "../../../lib/imageResize.js";
 
 function generatedImageFileName(prompt = "", mimeType = "image/jpeg") {
   const clean = String(prompt || "")
@@ -46,6 +47,7 @@ export function useChatSession({
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [imageMode, setImageMode] = useState(false);
+  const [imageEditSourceId, setImageEditSourceId] = useState(null);
   const [copied, setCopied] = useState(null);
   const [activeTitle, setActiveTitle] = useState("New conversation");
   const [activeHistoryId, setActiveHistoryId] = useState(null);
@@ -61,6 +63,17 @@ export function useChatSession({
   const hasUserMessages = useMemo(
     () => messages.some((message) => message.role === "user"),
     [messages]
+  );
+
+  const imageEditSource = useMemo(
+    () => imageEditSourceId
+      ? messages.find(
+          (message) =>
+            message.id === imageEditSourceId &&
+            message.generatedImage?.dataUrl
+        ) || null
+      : null,
+    [imageEditSourceId, messages]
   );
 
   const contextPercent = useMemo(() => {
@@ -159,6 +172,7 @@ export function useChatSession({
     setActiveHistoryId(null);
     setContextUsage(emptyContextUsage());
     setImageMode(false);
+    setImageEditSourceId(null);
     setStreaming(false);
   }
 
@@ -200,6 +214,7 @@ export function useChatSession({
       emptyContextUsage()
     );
     setImageMode(false);
+    setImageEditSourceId(null);
     setStreaming(false);
 
     const hasStoredImages =
@@ -291,7 +306,6 @@ export function useChatSession({
     documents,
     append = false,
     hiddenInstruction = "",
-    silentRetry = 0,
   }) {
     const target = conversation.find((message) => message.id === targetId) || messages.find((message) => message.id === targetId);
     const initialText = append && target?.content
@@ -304,7 +318,7 @@ export function useChatSession({
     setStreaming(true);
     const controller = new AbortController();
     abortRef.current = controller;
-    if (silentRetry === 0) incrementRequestCount();
+    incrementRequestCount();
 
     try {
       const payloadMessages = apiPayloadMessages(conversation);
@@ -324,42 +338,16 @@ export function useChatSession({
             maxTokens: Number(settings.maxTokens),
             systemInstructions: settings.systemInstructions,
           },
+          productContext: {
+            hasGeneratedImages: conversation.some(
+              (message) => Boolean(message?.generatedImage)
+            ),
+          },
         }),
       });
 
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
-
-        const transientStatus = [
-          408,
-          500,
-          502,
-          503,
-          504,
-        ].includes(response.status);
-
-        if (
-          transientStatus &&
-          silentRetry < 1 &&
-          !controller.signal.aborted
-        ) {
-          console.warn(
-            `Transient AI HTTP ${response.status}; retrying once automatically.`
-          );
-
-          await new Promise((resolve) =>
-            window.setTimeout(resolve, 700)
-          );
-
-          return runStream({
-            conversation,
-            targetId,
-            documents,
-            append,
-            hiddenInstruction,
-            silentRetry: silentRetry + 1,
-          });
-        }
 
         const info = friendlyError(
           response.status,
@@ -450,27 +438,6 @@ export function useChatSession({
 
       if (streamError && !fullText.trim()) {
 
-        if (
-          silentRetry < 1 &&
-          !controller.signal.aborted
-        ) {
-          console.warn(
-            "AI stream failed before first token; retrying once automatically."
-          );
-
-          await new Promise((resolve) =>
-            window.setTimeout(resolve, 700)
-          );
-
-          return runStream({
-            conversation,
-            targetId,
-            documents,
-            append,
-            hiddenInstruction,
-            silentRetry: silentRetry + 1,
-          });
-        }
 
         const info = friendlyError(502, streamError);
 
@@ -508,26 +475,6 @@ export function useChatSession({
         ));
         return { ok: false, aborted: true };
       }
-      if (silentRetry < 1) {
-        console.warn(
-          "AI network request failed; retrying once automatically.",
-          error
-        );
-
-        await new Promise((resolve) =>
-          window.setTimeout(resolve, 700)
-        );
-
-        return runStream({
-          conversation,
-          targetId,
-          documents,
-          append,
-          hiddenInstruction,
-          silentRetry: silentRetry + 1,
-        });
-      }
-
       const info = friendlyError(502, error.message);
 
       setMessages((current) =>
@@ -552,6 +499,8 @@ export function useChatSession({
   async function runImageGeneration({
     prompt,
     targetId,
+    sourceImage = "",
+    sourceMessageId = null,
   }) {
     setStreaming(true);
 
@@ -576,6 +525,7 @@ export function useChatSession({
               controller.signal,
             body: JSON.stringify({
               prompt,
+              sourceImage,
               aspectRatio: "1:1",
               outputFormat: "jpeg",
             }),
@@ -604,7 +554,7 @@ export function useChatSession({
                   content: "",
                   error: info,
                   finishReason: null,
-                  generationMode: "image",
+                  generationMode: sourceImage ? "image-edit" : "image",
                 }
               : message
           )
@@ -659,14 +609,20 @@ export function useChatSession({
             ? {
                 ...message,
                 content:
-                  "Generated image",
+                  sourceImage
+                    ? "Edited image"
+                    : "Generated image",
                 error: null,
                 finishReason:
                   "image",
                 generationMode:
-                  "image",
+                  sourceImage
+                    ? "image-edit"
+                    : "image",
                 imagePrompt:
                   prompt,
+                imageSourceId:
+                  sourceMessageId,
                 provider:
                   data.provider ||
                   "Cloudflare Workers AI",
@@ -678,6 +634,9 @@ export function useChatSession({
             : message
         )
       );
+
+      setImageMode(true);
+      setImageEditSourceId(targetId);
 
       return {
         ok: true,
@@ -699,7 +658,7 @@ export function useChatSession({
                   finishReason:
                     "cancelled",
                   generationMode:
-                    "image",
+                    sourceImage ? "image-edit" : "image",
                 }
               : message
           )
@@ -726,7 +685,7 @@ export function useChatSession({
                 content: "",
                 error: info,
                 generationMode:
-                  "image",
+                  sourceImage ? "image-edit" : "image",
               }
             : message
         )
@@ -782,9 +741,47 @@ export function useChatSession({
         selectedAttachments.length > 0
       ) {
         window.alert(
-          "Create image V1 currently uses text prompts only. Remove attachments first."
+          imageEditSourceId
+            ? "Remove attachments before editing the generated image."
+            : "Create image currently uses a text prompt. Remove attachments first."
         );
         return;
+      }
+
+      const sourceMessage = imageEditSourceId
+        ? messages.find(
+            (message) =>
+              message.id === imageEditSourceId &&
+              message.generatedImage?.dataUrl
+          ) || null
+        : null;
+
+      if (imageEditSourceId && !sourceMessage) {
+        window.alert(
+          "The image selected for editing is not available. Select Edit on the image again."
+        );
+        setImageEditSourceId(null);
+        return;
+      }
+
+      let sourceImage = "";
+
+      if (sourceMessage?.generatedImage?.dataUrl) {
+        try {
+          sourceImage = await prepareImageReference(
+            sourceMessage.generatedImage.dataUrl
+          );
+        } catch (error) {
+          console.warn(
+            "Unable to prepare image reference:",
+            error
+          );
+
+          window.alert(
+            "Codarox AI could not prepare this image for editing. Please try the Edit action again."
+          );
+          return;
+        }
       }
 
       const userMessage = {
@@ -792,6 +789,9 @@ export function useChatSession({
         role: "user",
         content: text,
         attachments: [],
+        ...(sourceMessage
+          ? { imageEditSourceId: sourceMessage.id }
+          : {}),
       };
 
       const assistantMessage = {
@@ -802,8 +802,11 @@ export function useChatSession({
         error: null,
         provider: null,
         model: null,
-        generationMode: "image",
+        generationMode: sourceMessage
+          ? "image-edit"
+          : "image",
         imagePrompt: text,
+        imageSourceId: sourceMessage?.id || null,
       };
 
       const outgoing = [
@@ -829,7 +832,6 @@ export function useChatSession({
 
       setInput("");
       setAttachments([]);
-      setImageMode(false);
 
       setMessages([
         ...outgoing,
@@ -841,6 +843,9 @@ export function useChatSession({
           prompt: text,
           targetId:
             assistantMessage.id,
+          sourceImage,
+          sourceMessageId:
+            sourceMessage?.id || null,
         });
 
       if (
@@ -918,8 +923,9 @@ export function useChatSession({
       messages.slice(0, index);
 
     if (
-      target?.generationMode ===
-      "image"
+      target?.generationMode === "image" ||
+      target?.generationMode === "image-edit" ||
+      target?.generatedImage
     ) {
       const previousUser =
         [...conversation]
@@ -938,6 +944,30 @@ export function useChatSession({
 
       if (!prompt) return;
 
+      const sourceMessage = target.imageSourceId
+        ? messages.find(
+            (message) =>
+              message.id === target.imageSourceId &&
+              message.generatedImage?.dataUrl
+          ) || null
+        : null;
+
+      let sourceImage = "";
+
+      if (sourceMessage?.generatedImage?.dataUrl) {
+        try {
+          sourceImage = await prepareImageReference(
+            sourceMessage.generatedImage.dataUrl
+          );
+        } catch (error) {
+          console.warn(
+            "Unable to prepare retry image reference:",
+            error
+          );
+          return;
+        }
+      }
+
       const replacement = {
         id: messageId,
         role: "assistant",
@@ -946,8 +976,12 @@ export function useChatSession({
         error: null,
         provider: null,
         model: null,
-        generationMode: "image",
+        generationMode: sourceMessage
+          ? "image-edit"
+          : "image",
         imagePrompt: prompt,
+        imageSourceId:
+          sourceMessage?.id || null,
       };
 
       setMessages([
@@ -958,6 +992,9 @@ export function useChatSession({
       await runImageGeneration({
         prompt,
         targetId: messageId,
+        sourceImage,
+        sourceMessageId:
+          sourceMessage?.id || null,
       });
 
       return;
@@ -999,23 +1036,46 @@ export function useChatSession({
   function toggleImageMode() {
     if (streaming) return;
 
-    if (
-      !imageMode &&
-      attachments.length > 0
-    ) {
+    if (imageMode) {
+      setImageMode(false);
+      setImageEditSourceId(null);
+      window.requestAnimationFrame(
+        () => textareaRef.current?.focus?.()
+      );
+      return;
+    }
+
+    if (attachments.length > 0) {
       window.alert(
         "Remove attachments before entering Create image mode."
       );
       return;
     }
 
-    setImageMode(
-      (current) => !current
-    );
+    setImageEditSourceId(null);
+    setImageMode(true);
 
     window.requestAnimationFrame(
-      () =>
-        textareaRef.current?.focus?.()
+      () => textareaRef.current?.focus?.()
+    );
+  }
+
+  function editGeneratedImage(message) {
+    if (streaming) return;
+
+    if (!message?.generatedImage?.dataUrl) {
+      window.alert(
+        "This generated image is not available for editing yet."
+      );
+      return;
+    }
+
+    setAttachments([]);
+    setImageEditSourceId(message.id);
+    setImageMode(true);
+
+    window.requestAnimationFrame(
+      () => textareaRef.current?.focus?.()
     );
   }
 
@@ -1070,6 +1130,8 @@ export function useChatSession({
     setInput,
     streaming,
     imageMode,
+    imageEditSource,
+    imageEditSourceId,
     copied,
     activeTitle,
     setActiveTitle,
@@ -1092,6 +1154,7 @@ export function useChatSession({
     stopGeneration,
     copyMessage,
     toggleImageMode,
+    editGeneratedImage,
     downloadGeneratedImage,
     handleKeyDown,
     handleConversationCopy,

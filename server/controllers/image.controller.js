@@ -13,6 +13,8 @@ export async function generateImageController(req, res) {
   try {
     const result = await generateCloudflareImage({
         prompt: req.body?.prompt,
+        sourceImage: req.body?.sourceImage,
+        aspectRatio: req.body?.aspectRatio,
         signal: controller.signal,
       });
 
@@ -33,6 +35,7 @@ export async function generateImageController(req, res) {
       model: result.model,
       mimeType: result.mimeType,
       dataUrl: result.dataUrl,
+      mode: result.mode,
       usage: result.usage,
     });
   } catch (error) {

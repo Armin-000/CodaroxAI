@@ -13,6 +13,7 @@ export const env = Object.freeze({
   cloudflareAccountId: (process.env.CLOUDFLARE_ACCOUNT_ID || "").trim(),
   cloudflareApiToken: (process.env.CLOUDFLARE_API_TOKEN || "").trim(),
   cloudflareImageModel: (process.env.CLOUDFLARE_IMAGE_MODEL || "@cf/black-forest-labs/flux-1-schnell").trim(),
+  cloudflareImageEditModel: (process.env.CLOUDFLARE_IMAGE_EDIT_MODEL || "@cf/black-forest-labs/flux-2-klein-4b").trim(),
   defaultContextLimit: Number(process.env.CONTEXT_LIMIT || 262144),
   projectRoot: path.resolve(__dirname, "../.."),
 });

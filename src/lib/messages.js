@@ -11,13 +11,30 @@ export function mergeDocuments(current, incoming) {
 export function apiMessages(conversation) {
   return conversation
     .filter((message) => message.id !== "welcome" && !message.localNotice)
-    .map(({ role, content, attachments }) => ({
-      role,
-      content,
-      attachments: Array.isArray(attachments)
-        ? attachments.filter((attachment) => attachment.kind === "image" && attachment.data)
-        : [],
-    }));
+    .map((message) => {
+      const generatedPrompt = String(
+        message?.imagePrompt ||
+        message?.generatedImage?.prompt ||
+        ""
+      ).trim();
+
+      const generatedImageContext = message?.generatedImage
+        ? `[Codarox AI ${message.generationMode === "image-edit" ? "edited" : "generated"} an image in this turn${generatedPrompt ? ` from this instruction: ${generatedPrompt}` : ""}.]`
+        : "";
+
+      const content = [
+        typeof message.content === "string" ? message.content : "",
+        generatedImageContext,
+      ].filter(Boolean).join("\n\n");
+
+      return {
+        role: message.role,
+        content,
+        attachments: Array.isArray(message.attachments)
+          ? message.attachments.filter((attachment) => attachment.kind === "image" && attachment.data)
+          : [],
+      };
+    });
 }
 
 export function cleanConversationCopy(selection) {

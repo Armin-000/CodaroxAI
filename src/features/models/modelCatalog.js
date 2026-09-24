@@ -9,7 +9,7 @@ export const MODEL_OPTIONS = [
     inputs: "Text, images, PDF",
     bestFor: "Everyday use",
     description:
-      "Uses Gemini first when available and falls back to OpenRouter automatically.",
+      "Routes across Gemini and OpenRouter automatically, with resilient fallback when a provider is busy or unavailable.",
     badge: "Recommended",
   },
   {

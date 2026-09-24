@@ -1,4 +1,4 @@
-import { AlertCircle, Check, Copy, Download, FileText, Plus, RefreshCw, Sparkles, Volume2 } from "lucide-react";
+import { AlertCircle, Check, Copy, Download, FileText, Pencil, Plus, RefreshCw, Sparkles, Volume2 } from "lucide-react";
 import { useApp } from "../../../app/AppContext.jsx";
 import { Logo } from "../../../components/ui/Logo.jsx";
 import { MarkdownMessage } from "./MarkdownMessage.jsx";
@@ -148,8 +148,10 @@ export function Conversation() {
 
                                 <span className="stream-status-label">
                                   {
-                                    message.generationMode === "image"
-                                      ? "Generating image"
+                                    message.generationMode === "image-edit"
+                                      ? "Editing image"
+                                      : message.generationMode === "image"
+                                        ? "Generating image"
                                       : message.content
                                         ? "Generating"
                                         : "Thinking"
@@ -203,56 +205,75 @@ export function Conversation() {
                           role="group"
                           aria-label="Message actions"
                         >
-                          {message.generationMode === "image" && message.generatedImage?.dataUrl && (
-                            <button
-                              type="button"
-                              onClick={() =>
-                                app.downloadGeneratedImage(message)
-                              }
-                              aria-label="Download generated image"
-                              data-tooltip="Download"
-                            >
-                              <Download size={15} />
-                            </button>
-                          )}
-                          <button
-                            type="button"
-                            onClick={() => app.copyMessage(message.id, message.content)}
-                            aria-label={app.copied === message.id ? "Copied" : "Copy response"}
-                            data-tooltip={app.copied === message.id ? "Copied" : "Copy"}
-                            data-copied={app.copied === message.id ? "true" : undefined}
-                          >
-                            {app.copied === message.id
-                              ? <Check size={15} />
-                              : <Copy size={15} />}
-                          </button>
+                          {message.generatedImage?.dataUrl ? (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  app.editGeneratedImage(message)
+                                }
+                                aria-label="Edit generated image"
+                                data-tooltip="Edit"
+                              >
+                                <Pencil size={15} />
+                              </button>
 
-                          <button
-                            type="button"
-                            onClick={() => app.speak(message.content)}
-                            aria-label="Read response aloud"
-                            data-tooltip="Read aloud"
-                          >
-                            <Volume2 size={15} />
-                          </button>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  app.downloadGeneratedImage(message)
+                                }
+                                aria-label="Download generated image"
+                                data-tooltip="Download"
+                              >
+                                <Download size={15} />
+                              </button>
 
-                          {isLastAssistant && (
-                            <button
-                              type="button"
-                              onClick={() => app.retryMessage(message.id)}
-                              aria-label={
-                                message.generationMode === "image"
-                                  ? "Regenerate image"
-                                  : "Retry response"
-                              }
-                              data-tooltip={
-                                message.generationMode === "image"
-                                  ? "Regenerate"
-                                  : "Retry"
-                              }
-                            >
-                              <RefreshCw size={15} />
-                            </button>
+                              {isLastAssistant && (
+                                <button
+                                  type="button"
+                                  onClick={() => app.retryMessage(message.id)}
+                                  aria-label={message.generationMode === "image-edit" ? "Retry image edit" : "Regenerate image"}
+                                  data-tooltip={message.generationMode === "image-edit" ? "Retry edit" : "Regenerate"}
+                                >
+                                  <RefreshCw size={15} />
+                                </button>
+                              )}
+                            </>
+                          ) : (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => app.copyMessage(message.id, message.content)}
+                                aria-label={app.copied === message.id ? "Copied" : "Copy response"}
+                                data-tooltip={app.copied === message.id ? "Copied" : "Copy"}
+                                data-copied={app.copied === message.id ? "true" : undefined}
+                              >
+                                {app.copied === message.id
+                                  ? <Check size={15} />
+                                  : <Copy size={15} />}
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => app.speak(message.content)}
+                                aria-label="Read response aloud"
+                                data-tooltip="Read aloud"
+                              >
+                                <Volume2 size={15} />
+                              </button>
+
+                              {isLastAssistant && (
+                                <button
+                                  type="button"
+                                  onClick={() => app.retryMessage(message.id)}
+                                  aria-label="Retry response"
+                                  data-tooltip="Retry"
+                                >
+                                  <RefreshCw size={15} />
+                                </button>
+                              )}
+                            </>
                           )}
                         </div>
                         {isLastAssistant && (message.finishReason === "length" || message.finishReason === "MAX_TOKENS" || message.interrupted) && (

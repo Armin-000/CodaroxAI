@@ -47,8 +47,10 @@ export function friendlyError(status, message = "") {
   if (status >= 500) {
     return {
       code: "provider_error",
-      title: "AI provider unavailable",
-      message: message || "The AI provider is temporarily unavailable. Please try again.",
+      title: "Codarox AI temporarily unavailable",
+      message:
+        message ||
+        "All configured AI routes are temporarily unavailable. Please try again shortly.",
       retryable: true,
     };
   }

@@ -25,6 +25,14 @@ export const MODEL_CONFIG = Object.freeze({
     contextLimit: 262_144,
     multimodal: true,
   },
+  "openrouter-free": {
+    id: "openrouter-free",
+    provider: "openrouter",
+    upstreamModel: "openrouter/free",
+    contextLimit: 131_072,
+    multimodal: true,
+    internal: true,
+  },
   "nemotron-3-ultra": {
     id: "nemotron-3-ultra",
     provider: "openrouter",

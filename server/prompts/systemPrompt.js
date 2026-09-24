@@ -1,3 +1,5 @@
+import { buildProductCapabilities } from "../config/productCapabilities.js";
+
 const RESPONSE_STYLE = `
 Conversation style:
 - Answer the user's actual question immediately.
@@ -22,7 +24,10 @@ When replying in Croatian:
 - Technical English terminology may remain when it is standard in software development.
 `.trim();
 
-export function buildSystemPrompt(settings = {}, { hasDocuments = false } = {}) {
+export function buildSystemPrompt(
+  settings = {},
+  { hasDocuments = false, hasGeneratedImages = false } = {}
+) {
   const language = settings.language === "hr"
     ? "Always reply in Croatian unless the user explicitly asks for another language."
     : settings.language === "en"
@@ -30,7 +35,13 @@ export function buildSystemPrompt(settings = {}, { hasDocuments = false } = {}) 
       : "Reply in the same language the user uses unless they explicitly ask for another language.";
 
   const documentRules = hasDocuments
-    ? `\nWhen answering from active documents:\n- Ground factual claims in those documents.\n- Never invent page numbers.\n- Preserve supplied source/page markers.\n- Cite PDF pages as 【filename.pdf, PAGE N】 when the exact page is known.\n- If the exact page is unavailable, cite only the filename.`
+    ? `
+When answering from active documents:
+- Ground factual claims in those documents.
+- Never invent page numbers.
+- Preserve supplied source/page markers.
+- Cite PDF pages as 【filename.pdf, PAGE N】 when the exact page is known.
+- If the exact page is unavailable, cite only the filename.`
     : "";
 
   const custom = String(settings.systemInstructions || "").trim();
@@ -38,10 +49,12 @@ export function buildSystemPrompt(settings = {}, { hasDocuments = false } = {}) 
   return [
     "You are Codarox AI, a polished and helpful AI assistant.",
     language,
+    buildProductCapabilities({ hasGeneratedImages }),
     RESPONSE_STYLE,
     CROATIAN_STYLE,
     documentRules,
     "Never invent facts, citations, document contents, sources or actions you did not perform.",
-    custom ? `Additional user instructions:\n${custom}` : "",
+    custom ? `Additional user instructions:
+${custom}` : "",
   ].filter(Boolean).join("\n\n");
 }

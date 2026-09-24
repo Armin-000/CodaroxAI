@@ -58,7 +58,10 @@ function collectMedia(message) {
 
 export async function buildOpenRouterPayload(body, modelConfig) {
   const settings = normalizeSettings(body?.settings);
-  const messages = [{ role: "system", content: buildSystemPrompt(settings, { hasDocuments: activeDocuments(body).length > 0 }) }];
+  const messages = [{ role: "system", content: buildSystemPrompt(settings, {
+    hasDocuments: activeDocuments(body).length > 0,
+    hasGeneratedImages: Boolean(body?.productContext?.hasGeneratedImages),
+  }) }];
 
   for (const message of rawMessages(body)) {
     const text = textFromContent(message.content).trim();
@@ -140,7 +143,10 @@ export function buildGeminiPayload(body) {
 
   return {
     settings,
-    systemInstruction: buildSystemPrompt(settings, { hasDocuments: docs.length > 0 }),
+    systemInstruction: buildSystemPrompt(settings, {
+      hasDocuments: docs.length > 0,
+      hasGeneratedImages: Boolean(body?.productContext?.hasGeneratedImages),
+    }),
     contents,
   };
 }
