@@ -1,0 +1,356 @@
+/* Codarox AI — Settings shell */
+
+.settings-overlay {
+  position: fixed;
+  z-index: 80;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.56);
+  backdrop-filter: blur(14px);
+}
+
+.settings-modal {
+  background: var(--panel);
+}
+
+.settings-sidebar-shell {
+  display: grid;
+  width: min(920px, 92vw);
+  height: min(640px, 84vh);
+  max-height: 84vh;
+  grid-template-columns: 218px minmax(0, 1fr);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+}
+
+.settings-sidebar-panel {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  padding: 18px 12px;
+  border-right: 1px solid var(--border);
+  background:
+    color-mix(
+      in srgb,
+      var(--panel) 96%,
+      var(--hover)
+    );
+}
+
+.settings-sidebar-top {
+  margin-bottom: 12px;
+}
+
+.settings-sidebar-title h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 680;
+}
+
+.settings-sidebar-title p {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 10.5px;
+  line-height: 1.4;
+}
+
+.settings-sidebar-nav {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.settings-nav-item {
+  position: relative;
+  display: grid;
+  width: 100%;
+  min-height: 48px;
+  grid-template-columns: 24px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.settings-nav-item:hover {
+  background: var(--hover);
+}
+
+.settings-nav-item.active {
+  background: var(--elevated);
+}
+
+.settings-nav-icon {
+  display: inline-flex;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  line-height: 1;
+}
+
+.settings-nav-icon svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 1.9;
+}
+
+.settings-nav-item.active .settings-nav-icon {
+  color: var(--text);
+}
+
+.settings-nav-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.settings-nav-copy strong {
+  font-size: 13px;
+  font-weight: 610;
+}
+
+.settings-nav-copy small {
+  display: none;
+}
+
+.settings-content-panel {
+  display: grid;
+  min-width: 0;
+  min-height: 0;
+  grid-template-rows:
+    auto
+    minmax(0, 1fr)
+    auto;
+  overflow: hidden;
+  background: var(--panel);
+}
+
+.settings-content-header {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 18px 22px 15px;
+  border-bottom: 1px solid var(--border);
+}
+
+.settings-content-header h3 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 670;
+  letter-spacing: -0.02em;
+}
+
+.settings-content-header p {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.settings-content-body {
+  min-width: 0;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color:
+    color-mix(
+      in srgb,
+      var(--text) 20%,
+      transparent
+    )
+    transparent;
+  -webkit-overflow-scrolling: touch;
+}
+
+.settings-content-body::-webkit-scrollbar {
+  width: 7px;
+}
+
+.settings-content-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.settings-content-body::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background:
+    color-mix(
+      in srgb,
+      var(--text) 18%,
+      transparent
+    );
+  background-clip: padding-box;
+}
+
+.settings-content-footer {
+  display: flex;
+  min-height: 44px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 16px;
+  border-top: 1px solid var(--border);
+  background: var(--panel);
+}
+
+.settings-save-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted-2);
+  font-size: 10px;
+}
+
+.settings-save-state svg {
+  stroke-width: 1.8;
+}
+
+
+/* Tablet */
+
+@media (max-width: 860px) {
+  .settings-sidebar-shell {
+    width: min(96vw, 760px);
+    height: min(90vh, 760px);
+    grid-template-columns:
+      190px
+      minmax(0, 1fr);
+  }
+}
+
+
+/* Mobile */
+
+@media (max-width: 700px) {
+  .settings-overlay {
+    place-items: stretch;
+    padding: 0;
+    background: var(--panel);
+    backdrop-filter: none;
+  }
+
+  .settings-sidebar-shell {
+    width: 100%;
+    height: 100dvh;
+    max-height: none;
+    grid-template-columns: 1fr;
+    grid-template-rows:
+      auto
+      minmax(0, 1fr);
+    border: 0;
+    border-radius: 0;
+  }
+
+  .settings-sidebar-panel {
+    padding: 10px 12px 8px;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+    background: var(--panel);
+  }
+
+  .settings-sidebar-top {
+    display: none;
+  }
+
+  .settings-sidebar-nav {
+    flex-direction: row;
+    gap: 6px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .settings-sidebar-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .settings-nav-item {
+    width: auto;
+    min-width: max-content;
+    min-height: 42px;
+    flex: 0 0 auto;
+    grid-template-columns:
+      20px
+      auto;
+    gap: 7px;
+    padding: 0 12px;
+    border-radius: 11px;
+    white-space: nowrap;
+  }
+
+  .settings-nav-icon {
+    width: 20px;
+    height: 20px;
+    flex-basis: 20px;
+  }
+
+  .settings-nav-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .settings-nav-copy {
+    display: block;
+  }
+
+  .settings-nav-copy strong {
+    font-size: 12px;
+    font-weight: 620;
+  }
+
+  .settings-content-header {
+    align-items: center;
+    padding: 15px 16px 13px;
+  }
+
+  .settings-content-header h3 {
+    font-size: 22px;
+  }
+
+  .settings-content-header p {
+    max-width: 260px;
+    font-size: 11px;
+  }
+
+  .settings-content-header .icon-button {
+    width: 40px;
+    height: 40px;
+    flex: 0 0 40px;
+  }
+
+  .settings-content-header .icon-button svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .settings-content-footer {
+    min-height:
+      calc(
+        44px +
+        env(safe-area-inset-bottom)
+      );
+    justify-content: flex-start;
+    padding:
+      0
+      16px
+      env(safe-area-inset-bottom);
+  }
+}

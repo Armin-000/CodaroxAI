@@ -1,0 +1,20 @@
+# Codarox AI
+
+> Codarox AI is a multimodal AI assistant by Codarox.
+
+## Product
+- Live application: https://codaroxai.codarox.com/
+- Codarox: https://codarox.com/
+- Case study: https://codarox.com/pages/codarox-ai.html
+- Source: https://github.com/Armin-000/CodaroxAI
+
+## Capabilities
+- AI conversations and coding assistance
+- Document and image analysis
+- AI image generation
+- Streaming responses
+- Conversation history
+
+## Creator
+Armin Lisic — Software Engineer
+https://codarox.com/

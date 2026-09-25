@@ -1,0 +1,41 @@
+/* Codarox AI — native control overrides */
+
+/*
+ * Use one browser-independent chevron for every native select.
+ * Feature styles only adjust the right offset/size where needed.
+ */
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  padding-right: 38px;
+
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='16' height='16' fill='none' stroke='%236b6b73' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px 16px;
+}
+
+[data-theme="dark"] select {
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='16' height='16' fill='none' stroke='%23a1a1aa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+}
+
+.composer-model-picker select {
+  padding-right: 31px;
+  background-position: right 10px center;
+  background-size: 15px 15px;
+}
+
+.settings-content-panel select,
+.settings-modal select {
+  padding-right: 40px;
+  background-position: right 13px center;
+}
+
+select::-ms-expand {
+  display: none;
+}
