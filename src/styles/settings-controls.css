@@ -1,0 +1,890 @@
+/* Codarox AI — Settings controls */
+
+.settings-panel-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.settings-split-row,
+.settings-info-row,
+.settings-textarea-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  min-height: 70px;
+  padding: 0 22px;
+  border-bottom: 1px solid var(--border);
+}
+
+.settings-panel-section > :last-child {
+  border-bottom: 0;
+}
+
+.settings-textarea-row {
+  align-items: flex-start;
+  min-height: auto;
+  padding-top: 18px;
+  padding-bottom: 18px;
+}
+
+.settings-row-copy {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.settings-row-copy strong {
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 590;
+}
+
+.settings-row-copy small {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.settings-split-row select,
+.settings-inline-button,
+.settings-pill {
+  flex: 0 0 auto;
+}
+
+.settings-split-row select {
+  min-width: 165px;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background-color: var(--elevated);
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.settings-toggle-row input[type="checkbox"] {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  margin: 0;
+  accent-color: var(--text);
+}
+
+.settings-textarea-row textarea {
+  width: min(440px, 100%);
+  min-height: 105px;
+  padding: 12px 13px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--elevated);
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.settings-inline-button {
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: var(--elevated);
+  color: var(--text);
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+}
+
+.settings-inline-button:hover {
+  background: var(--hover);
+}
+
+.settings-pill {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  padding: 0 11px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--elevated);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 550;
+  white-space: nowrap;
+}
+
+.settings-slider-group {
+  display: flex;
+  min-width: 220px;
+  align-items: center;
+  gap: 12px;
+}
+
+.settings-slider-group input[type="range"] {
+  min-width: 0;
+  flex: 1 1 auto;
+  accent-color: var(--text);
+}
+
+.settings-slider-group span {
+  min-width: 42px;
+  color: var(--muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.settings-preview-box {
+  padding: 18px 22px;
+}
+
+.settings-preview-label {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.settings-preview-message {
+  max-width: 400px;
+  padding: 11px 13px;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: var(--elevated);
+  color: var(--text);
+  font-size: var(--chat-font-size, 16px);
+}
+
+
+/* Mobile */
+
+@media (max-width: 700px) {
+  .settings-split-row,
+  .settings-info-row,
+  .settings-textarea-row {
+    min-height: 0;
+    padding: 16px;
+  }
+
+  .settings-split-row,
+  .settings-textarea-row {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .settings-toggle-row {
+    min-height: 68px;
+    align-items: center;
+    flex-direction: row;
+    gap: 16px;
+  }
+
+  .settings-toggle-row .settings-row-copy {
+    padding-right: 8px;
+  }
+
+  .settings-info-row {
+    gap: 14px;
+  }
+
+  .settings-row-copy strong {
+    font-size: 14px;
+  }
+
+  .settings-row-copy small {
+    font-size: 11.5px;
+  }
+
+  .settings-split-row select {
+    width: 100%;
+    min-width: 0;
+    height: 46px;
+    border-radius: 12px;
+    font-size: 13px;
+  }
+
+  .settings-textarea-row textarea {
+    width: 100%;
+    min-height: 120px;
+    font-size: 13px;
+  }
+
+  .settings-slider-group {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .settings-preview-box {
+    padding: 18px 16px 22px;
+  }
+
+  .settings-preview-message {
+    max-width: none;
+    padding: 13px 14px;
+    border-radius: 12px;
+  }
+}
+
+@media (max-width: 380px) {
+  .settings-info-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+
+
+/* =========================================================
+   CODAROX ADVANCED SETTINGS
+   ========================================================= */
+
+.settings-advanced-page {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  padding: 12px 14px 22px;
+  gap: 12px;
+}
+
+.settings-advanced-section {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  background:
+    color-mix(
+      in srgb,
+      var(--panel) 96%,
+      var(--elevated)
+    );
+}
+
+.settings-advanced-section > :last-child {
+  border-bottom: 0;
+}
+
+.settings-advanced-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 13px 18px 11px;
+  border-bottom: 1px solid var(--border);
+  background:
+    color-mix(
+      in srgb,
+      var(--elevated) 58%,
+      transparent
+    );
+}
+
+.settings-advanced-heading span {
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 720;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+}
+
+.settings-advanced-heading small {
+  color: var(--muted-2);
+  font-size: 10px;
+  line-height: 1.4;
+  text-align: right;
+}
+
+.settings-advanced-section .settings-split-row,
+.settings-advanced-section .settings-info-row {
+  min-height: 68px;
+  padding-right: 18px;
+  padding-left: 18px;
+}
+
+.settings-advanced-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.settings-health-pill {
+  position: relative;
+  padding-left: 22px;
+}
+
+.settings-health-pill::before {
+  position: absolute;
+  left: 10px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--muted-2);
+  content: "";
+}
+
+.settings-health-pill.is-good::before {
+  background: #22a55b;
+  box-shadow:
+    0 0 0 3px
+    color-mix(
+      in srgb,
+      #22a55b 14%,
+      transparent
+    );
+}
+
+.settings-health-pill.is-warn::before {
+  background: #d97706;
+  box-shadow:
+    0 0 0 3px
+    color-mix(
+      in srgb,
+      #d97706 14%,
+      transparent
+    );
+}
+
+.settings-reset-row .settings-inline-button {
+  min-width: 84px;
+}
+
+/*
+ * Actual Reduced Motion preference
+ */
+:root[data-reduced-motion="true"] *,
+:root[data-reduced-motion="true"] *::before,
+:root[data-reduced-motion="true"] *::after {
+  scroll-behavior: auto !important;
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  transition-delay: 0ms !important;
+}
+
+
+/* Mobile */
+
+@media (max-width: 700px) {
+  .settings-advanced-page {
+    padding:
+      10px
+      10px
+      calc(18px + env(safe-area-inset-bottom));
+    gap: 10px;
+  }
+
+  .settings-advanced-section {
+    border-radius: 14px;
+  }
+
+  .settings-advanced-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px 14px 10px;
+  }
+
+  .settings-advanced-heading small {
+    text-align: left;
+  }
+
+  .settings-advanced-section .settings-split-row,
+  .settings-advanced-section .settings-info-row {
+    padding: 15px 14px;
+  }
+
+  .settings-advanced-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .settings-advanced-actions .settings-inline-button {
+    min-width: 96px;
+  }
+
+  .settings-advanced-section .settings-info-row {
+    align-items: center;
+  }
+}
+
+
+@media (max-width: 430px) {
+  .settings-advanced-section .settings-info-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .settings-advanced-section
+    .settings-info-row
+    > .settings-pill,
+  .settings-advanced-section
+    .settings-info-row
+    > .settings-inline-button {
+    align-self: flex-start;
+  }
+
+  .settings-advanced-actions {
+    align-items: center;
+  }
+}
+
+
+/* =========================================================
+   CODAROX VOICE SETTINGS
+   ========================================================= */
+
+.settings-voice-page {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px 14px 22px;
+}
+
+.settings-voice-section {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  background:
+    color-mix(
+      in srgb,
+      var(--panel) 96%,
+      var(--elevated)
+    );
+}
+
+.settings-voice-section > :last-child {
+  border-bottom: 0;
+}
+
+.settings-voice-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 13px 18px 11px;
+  border-bottom:
+    1px solid var(--border);
+  background:
+    color-mix(
+      in srgb,
+      var(--elevated) 58%,
+      transparent
+    );
+}
+
+.settings-voice-heading span {
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 720;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+}
+
+.settings-voice-heading small {
+  color:
+    var(
+      --muted-2,
+      var(--muted)
+    );
+  font-size: 10px;
+  line-height: 1.4;
+  text-align: right;
+}
+
+.settings-voice-section
+.settings-split-row,
+.settings-voice-section
+.settings-info-row {
+  min-height: 68px;
+  padding-right: 18px;
+  padding-left: 18px;
+}
+
+.settings-voice-note {
+  padding: 9px 18px 11px;
+  border-bottom:
+    1px solid var(--border);
+  color: var(--muted);
+  font-size: 10.5px;
+  line-height: 1.5;
+}
+
+.settings-voice-status {
+  position: relative;
+  padding-left: 22px;
+}
+
+.settings-voice-status::before {
+  position: absolute;
+  left: 10px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--muted);
+  content: "";
+}
+
+.settings-voice-status.is-good::before {
+  background: #22a55b;
+  box-shadow:
+    0 0 0 3px
+    color-mix(
+      in srgb,
+      #22a55b 14%,
+      transparent
+    );
+}
+
+.settings-voice-status.is-warn::before {
+  background: #d97706;
+  box-shadow:
+    0 0 0 3px
+    color-mix(
+      in srgb,
+      #d97706 14%,
+      transparent
+    );
+}
+
+.settings-split-row
+input[type="checkbox"]:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+.settings-mic-test-row {
+  padding: 16px 18px 18px;
+  border-bottom:
+    1px solid var(--border);
+}
+
+.settings-mic-test-copy {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.settings-mic-meter {
+  position: relative;
+  height: 7px;
+  margin-top: 14px;
+  overflow: hidden;
+  border:
+    1px solid var(--border);
+  border-radius: 999px;
+  background: var(--elevated);
+}
+
+.settings-mic-meter span {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--text);
+  transition:
+    width 80ms linear;
+}
+
+.settings-mic-stop {
+  border-color:
+    color-mix(
+      in srgb,
+      #ef4444 35%,
+      var(--border)
+    );
+}
+
+
+@media (max-width: 700px) {
+  .settings-voice-page {
+    gap: 10px;
+    padding:
+      10px
+      10px
+      calc(
+        18px +
+        env(safe-area-inset-bottom)
+      );
+  }
+
+  .settings-voice-section {
+    border-radius: 14px;
+  }
+
+  .settings-voice-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px 14px 10px;
+  }
+
+  .settings-voice-heading small {
+    text-align: left;
+  }
+
+  .settings-voice-section
+  .settings-split-row,
+  .settings-voice-section
+  .settings-info-row {
+    padding: 15px 14px;
+  }
+
+  .settings-voice-note {
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  .settings-mic-test-row {
+    padding: 15px 14px 17px;
+  }
+
+  .settings-mic-test-copy {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .settings-mic-test-copy
+  .settings-inline-button {
+    width: 100%;
+  }
+}
+
+
+@media (max-width: 430px) {
+  .settings-voice-section
+  .settings-info-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .settings-voice-section
+  .settings-info-row
+  > .settings-pill,
+
+  .settings-voice-section
+  .settings-info-row
+  > .settings-inline-button {
+    align-self: flex-start;
+  }
+}
+
+
+/* =========================================================
+   CODAROX DESIGN LIVE PREVIEW
+   ========================================================= */
+
+.settings-design-preview {
+  padding:
+    18px
+    22px
+    22px;
+}
+
+
+.design-preview-stage {
+  width: 100%;
+  max-width: 500px;
+
+  padding: 16px;
+
+  border:
+    1px solid
+    var(--border);
+
+  border-radius: 14px;
+
+  background:
+    color-mix(
+      in srgb,
+      var(--elevated) 72%,
+      var(--panel)
+    );
+
+  transition:
+    max-width 160ms ease,
+    padding 160ms ease;
+}
+
+
+:root[data-message-width="compact"]
+.design-preview-stage {
+  max-width: 400px;
+}
+
+
+:root[data-message-width="comfortable"]
+.design-preview-stage {
+  max-width: 500px;
+}
+
+
+:root[data-message-width="wide"]
+.design-preview-stage {
+  max-width: 620px;
+}
+
+
+.design-preview-user,
+.design-preview-assistant {
+  font-size:
+    var(
+      --chat-font-size,
+      16px
+    );
+}
+
+
+.design-preview-user {
+  width: fit-content;
+  max-width: 72%;
+
+  margin-left: auto;
+}
+
+
+.design-preview-user > span,
+.design-preview-assistant > span {
+  display: block;
+
+  margin-bottom: 5px;
+
+  color:
+    var(--muted-2);
+
+  font-size: 9px;
+  font-weight: 650;
+
+  letter-spacing: 0.04em;
+
+  text-transform: uppercase;
+}
+
+
+.design-preview-user p,
+.design-preview-assistant p {
+  margin: 0;
+
+  color: var(--text);
+
+  font-size: inherit;
+
+  line-height: 1.5;
+}
+
+
+.design-preview-assistant {
+  margin-top: 20px;
+}
+
+
+:root[data-density="compact"]
+.design-preview-stage {
+  padding: 12px;
+}
+
+
+:root[data-density="compact"]
+.design-preview-assistant {
+  margin-top: 14px;
+}
+
+
+.design-preview-assistant pre {
+  margin:
+    10px
+    0
+    0;
+
+  padding:
+    10px
+    12px;
+
+  overflow-x: auto;
+
+  border-radius: 9px;
+
+  background: #101010;
+
+  color: #ededed;
+}
+
+
+.design-preview-assistant code {
+  font-size:
+    var(
+      --code-font-size,
+      12.5px
+    );
+
+  line-height: 1.5;
+}
+
+
+.design-preview-meta {
+  display: flex;
+
+  flex-wrap: wrap;
+
+  gap: 6px;
+
+  margin-top: 13px;
+}
+
+
+.design-preview-meta span {
+  padding:
+    4px
+    7px;
+
+  border:
+    1px solid
+    var(--border);
+
+  border-radius: 999px;
+
+  color: var(--muted);
+
+  font-size: 9px;
+
+  text-transform: capitalize;
+}
+
+
+:root[data-density="compact"]
+.settings-panel-section
+> .settings-split-row {
+  min-height: 62px;
+}
+
+
+@media (max-width: 700px) {
+  .settings-design-preview {
+    padding: 16px;
+  }
+
+  .design-preview-stage,
+  :root[data-message-width="compact"]
+  .design-preview-stage,
+  :root[data-message-width="comfortable"]
+  .design-preview-stage,
+  :root[data-message-width="wide"]
+  .design-preview-stage {
+    max-width: none;
+    padding: 14px;
+  }
+}

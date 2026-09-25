@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#0a0a0a" />
+    <script>
+      /* Codarox pre-paint theme: prevent dark/light flash before React mounts. */
+      (() => {
+        try {
+          const raw = localStorage.getItem("codarox-ai-settings-v1");
+          const saved = raw ? JSON.parse(raw) : {};
+          const preference = saved?.theme || "system";
+
+          const systemDark =
+            window.matchMedia?.("(prefers-color-scheme: dark)").matches ?? true;
+
+          const dark =
+            preference === "dark" ||
+            (preference === "system" && systemDark);
+
+          const theme = dark ? "dark" : "light";
+          const bg = dark ? "#0a0a0a" : "#ffffff";
+
+          document.documentElement.dataset.theme = theme;
+          document.documentElement.style.colorScheme = theme;
+          document.documentElement.style.backgroundColor = bg;
+
+          document.documentElement.style.setProperty(
+            "--chat-font-size",
+            String(Number(saved?.fontSize || 16)) + "px"
+          );
+
+                    /* Codarox pre-paint design */
+          const messageWidth =
+            saved?.messageWidth ||
+            "comfortable";
+
+          const density =
+            saved?.interfaceDensity ||
+            "comfortable";
+
+          const codeFontSize =
+            saved?.codeFontSize ||
+            "normal";
+
+
+          const conversationWidths = {
+            compact: "680px",
+            comfortable: "760px",
+            wide: "920px"
+          };
+
+
+          const composerWidths = {
+            compact: "620px",
+            comfortable: "680px",
+            wide: "800px"
+          };
+
+
+          const codeSizes = {
+            small: "11.5px",
+            normal: "12.5px",
+            large: "14px"
+          };
+
+
+          document.documentElement
+            .dataset.messageWidth =
+              messageWidth;
+
+          document.documentElement
+            .dataset.density =
+              density;
+
+          document.documentElement
+            .dataset.codeFontSize =
+              codeFontSize;
+
+
+          document.documentElement
+            .style.setProperty(
+              "--conversation-max-width",
+              conversationWidths[
+                messageWidth
+              ] ||
+                conversationWidths
+                  .comfortable
+            );
+
+
+          document.documentElement
+            .style.setProperty(
+              "--composer-max-width",
+              composerWidths[
+                messageWidth
+              ] ||
+                composerWidths
+                  .comfortable
+            );
+
+
+          document.documentElement
+            .style.setProperty(
+              "--code-font-size",
+              codeSizes[
+                codeFontSize
+              ] ||
+                codeSizes.normal
+            );
+
+document
+            .querySelector('meta[name="theme-color"]')
+            ?.setAttribute("content", bg);
+        } catch {
+          document.documentElement.dataset.theme = "dark";
+          document.documentElement.style.colorScheme = "dark";
+          document.documentElement.style.backgroundColor = "#0a0a0a";
+        }
+      })();
+    </script>
+    <!-- CODAROX SEO START -->
+    <title>Codarox AI — Multimodal AI Assistant by Codarox</title>
+
+    <meta
+      name="description"
+      content="Codarox AI is a multimodal AI assistant by Codarox for chat, coding, document and image analysis, and AI image generation."
+    />
+    <meta name="author" content="Armin Lisic" />
+    <meta name="application-name" content="Codarox AI" />
+    <meta name="apple-mobile-web-app-title" content="Codarox AI" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="msapplication-TileColor" content="#0a0a0a" />
+    <meta name="msapplication-config" content="/browserconfig.xml" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <meta
+      name="robots"
+      content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+    />
+
+    <!-- Canonical -->
+    <link rel="canonical" href="https://codaroxai.codarox.com/" />
+
+    <!-- Favicons / app identity -->
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="96x96"
+      href="/favicon-96.png"
+    />
+    <link
+      id="app-favicon"
+      rel="icon"
+      type="image/svg+xml"
+      href="/favicon-light.svg"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="/apple-touch-icon.png"
+    />
+    <link rel="manifest" href="/manifest.webmanifest" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Codarox AI" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:url" content="https://codaroxai.codarox.com/" />
+    <meta
+      property="og:title"
+      content="Codarox AI — Multimodal AI Assistant by Codarox"
+    />
+    <meta
+      property="og:description"
+      content="A multimodal AI workspace by Codarox for conversations, coding, document and image analysis, and AI image generation."
+    />
+    <meta property="og:image" content="https://codaroxai.codarox.com/codarox-ai-og.png" />
+    <meta property="og:image:secure_url" content="https://codaroxai.codarox.com/codarox-ai-og.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="Codarox AI — multimodal AI assistant by Codarox"
+    />
+
+    <!-- X / Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="Codarox AI — Multimodal AI Assistant by Codarox"
+    />
+    <meta
+      name="twitter:description"
+      content="A multimodal AI workspace by Codarox for conversations, coding, documents, images and generation."
+    />
+    <meta name="twitter:image" content="https://codaroxai.codarox.com/codarox-ai-og.png" />
+    <meta
+      name="twitter:image:alt"
+      content="Codarox AI — multimodal AI assistant by Codarox"
+    />
+
+    <!-- Schema.org / JSON-LD -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Person",
+          "@id": "https://codarox.com/#person",
+          "name": "Armin Lisic",
+          "url": "https://codarox.com/",
+          "jobTitle": "Software Engineer"
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://codaroxai.codarox.com/#website",
+          "url": "https://codaroxai.codarox.com/",
+          "name": "Codarox AI",
+          "alternateName": "Codarox AI by Codarox",
+          "inLanguage": "en",
+          "publisher": {
+            "@id": "https://codarox.com/#person"
+          }
+        },
+        {
+          "@type": "WebApplication",
+          "@id": "https://codaroxai.codarox.com/#software",
+          "name": "Codarox AI",
+          "url": "https://codaroxai.codarox.com/",
+          "applicationCategory": "UtilitiesApplication",
+          "operatingSystem": "Any",
+          "browserRequirements": "Requires JavaScript and a modern web browser.",
+          "description": "Codarox AI is a multimodal AI assistant by Codarox for chat, coding, document and image analysis, and AI image generation.",
+          "image": "https://codaroxai.codarox.com/codarox-ai-og.png",
+          "creator": {
+            "@id": "https://codarox.com/#person"
+          },
+          "brand": {
+            "@type": "Brand",
+            "name": "Codarox",
+            "url": "https://codarox.com/"
+          },
+          "sameAs": [
+            "https://github.com/Armin-000/CodaroxAI",
+            "https://codarox.com/pages/codarox-ai.html"
+          ],
+          "featureList": [
+            "AI conversations",
+            "Coding assistance",
+            "Document analysis",
+            "Image analysis",
+            "AI image generation",
+            "Streaming responses",
+            "Conversation history"
+          ]
+        },
+        {
+          "@type": "WebPage",
+          "@id": "https://codaroxai.codarox.com/#webpage",
+          "url": "https://codaroxai.codarox.com/",
+          "name": "Codarox AI — Multimodal AI Assistant by Codarox",
+          "description": "Codarox AI is a multimodal AI assistant by Codarox for chat, coding, document and image analysis, and AI image generation.",
+          "inLanguage": "en",
+          "isPartOf": {
+            "@id": "https://codaroxai.codarox.com/#website"
+          },
+          "mainEntity": {
+            "@id": "https://codaroxai.codarox.com/#software"
+          },
+          "primaryImageOfPage": {
+            "@type": "ImageObject",
+            "url": "https://codaroxai.codarox.com/codarox-ai-og.png",
+            "width": 1200,
+            "height": 630
+          }
+        }
+      ]
+    }
+    </script>
+    <!-- CODAROX SEO END -->
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

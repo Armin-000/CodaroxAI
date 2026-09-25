@@ -1,0 +1,369 @@
+/* Codarox AI — markdown styles */
+
+.inline-code {
+  padding: 2px 5px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--elevated);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.9em;
+}
+
+.code-block {
+  width: 100%;
+  max-width: 100%;
+  margin: 12px 0;
+  overflow-x: auto;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #080808;
+  color: #e7e7e7;
+  line-height: 1.55;
+}
+
+:root[data-theme="light"] .code-block {
+  background: #151515;
+  color: #f0f0f0;
+}
+
+.code-block code {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 12px;
+}
+
+.citation-badge {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  margin: 0 2px;
+  padding: 3px 7px;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  background: var(--elevated);
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 540;
+  line-height: 1.35;
+  vertical-align: baseline;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  transition:
+    background 120ms ease,
+    border-color 120ms ease,
+    color 120ms ease;
+}
+
+.citation-badge:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--text) 22%,
+    transparent
+  );
+  background: var(--hover);
+  color: var(--text);
+}
+
+.citation-badge:active {
+  background: var(--active);
+}
+
+.citation-badge.static {
+  cursor: default;
+}
+
+.message-content .citation-badge {
+  position: relative;
+  top: -1px;
+}
+
+.markdown-table-wrap {
+  width: 100%;
+  margin: 16px 0 20px;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.message-content table {
+  width: 100%;
+  min-width: 480px;
+  border-collapse: collapse;
+  background: transparent;
+  font-size: 14px;
+}
+
+.code-shell {
+  width: 100%;
+  margin: 14px 0 18px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #0d0d0d;
+}
+
+.code-shell-header {
+  display: flex;
+  height: 38px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 11px 0 13px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: #111111;
+}
+
+.code-language {
+  color: #8f8f97;
+  font-family:
+    "SFMono-Regular",
+    Consolas,
+    "Liberation Mono",
+    monospace;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.045em;
+}
+
+.code-copy {
+  height: 27px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #a1a1aa;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.code-copy:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: #ffffff;
+}
+
+.code-shell .code-block {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 15px 16px 17px;
+  overflow-x: auto;
+  border: 0;
+  border-radius: 0;
+  background: #0d0d0d;
+  color: #e7e7e7;
+  line-height: 1.6;
+}
+
+.code-shell .code-block code {
+  font-family:
+    "SFMono-Regular",
+    Consolas,
+    "Liberation Mono",
+    monospace;
+  font-size: 12.5px;
+}
+
+:root[data-theme="light"] .code-shell,
+:root[data-theme="light"] .code-shell .code-block {
+  background: #121212;
+}
+
+:root[data-theme="light"] .code-shell-header {
+  background: #181818;
+}
+
+@media (max-width: 560px) {
+.message-content table {
+    min-width: 420px;
+    font-size: 13px;
+  }
+}
+
+/* Canonical markdown flow */
+
+/*
+ * Compact professional Codarox AI rhythm.
+ */
+
+.message-content > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+
+/* Basic block rhythm */
+
+.message-content > * + * {
+  margin-top: 8px;
+}
+
+
+/* Paragraphs */
+
+.message-content p {
+  line-height: 1.52;
+}
+
+
+/* Headings */
+
+.message-content h1,
+.message-content h2,
+.message-content h3,
+.message-content h4,
+.message-content h5,
+.message-content h6 {
+  line-height: 1.25;
+
+  letter-spacing: -0.02em;
+}
+
+.message-content h1 {
+  font-size: 18px;
+  font-weight: 650;
+}
+
+.message-content h2 {
+  font-size: 15.5px;
+  font-weight: 650;
+}
+
+.message-content h3 {
+  font-size: 14.25px;
+  font-weight: 625;
+}
+
+.message-content h4,
+.message-content h5,
+.message-content h6 {
+  font-size: 13.75px;
+  font-weight: 600;
+}
+
+
+/* New sections */
+
+.message-content p + h1,
+.message-content p + h2,
+.message-content p + h3,
+.message-content p + h4,
+.message-content ul + h1,
+.message-content ul + h2,
+.message-content ul + h3,
+.message-content ol + h1,
+.message-content ol + h2,
+.message-content ol + h3 {
+  margin-top: 14px;
+}
+
+
+/* Heading -> body/list */
+
+.message-content h1 + p,
+.message-content h2 + p,
+.message-content h3 + p,
+.message-content h4 + p,
+.message-content h1 + ul,
+.message-content h2 + ul,
+.message-content h3 + ul,
+.message-content h4 + ul,
+.message-content h1 + ol,
+.message-content h2 + ol,
+.message-content h3 + ol,
+.message-content h4 + ol {
+  margin-top: 7px;
+}
+
+
+/* Lists */
+
+.message-content ul,
+.message-content ol {
+  padding-left: 20px;
+}
+
+.message-content li {
+  margin: 0;
+
+  line-height: 1.48;
+}
+
+.message-content li + li {
+  margin-top: 4px;
+}
+
+.message-content li > p {
+  margin: 0;
+}
+
+.message-content li > p + p {
+  margin-top: 4px;
+}
+
+.message-content li > ul,
+.message-content li > ol {
+  margin-top: 4px;
+}
+
+
+/* Blockquotes */
+
+.message-content blockquote {
+  margin: 0;
+
+  padding:
+    1px
+    0
+    1px
+    10px;
+
+  border-left:
+    2px
+    solid
+    var(--border-strong);
+
+  color: var(--muted);
+}
+
+
+/* Code */
+
+.message-content pre {
+  margin: 0;
+}
+
+
+/* Separators */
+
+.message-content hr {
+  height: 0;
+
+  margin:
+    13px
+    0;
+
+  border: 0;
+  border-top:
+    1px
+    solid
+    var(--border);
+}
+
+/* End canonical markdown flow */
+
+
+/* =========================================================
+   CODAROX DESIGN CODE SIZE
+   ========================================================= */
+
+.code-block code,
+.code-shell .code-block code {
+  font-size:
+    var(
+      --code-font-size,
+      12.5px
+    );
+}

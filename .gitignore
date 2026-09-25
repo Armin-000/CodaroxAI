@@ -1,0 +1,13 @@
+node_modules
+dist
+.env
+.DS_Store
+*.log
+
+.backup-*/
+node_modules/
+dist/
+.env.local
+.env.development
+.env.production
+.env.*.local
